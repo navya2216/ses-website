@@ -1,0 +1,141 @@
+Project Structure
+React UI Gallery
+│
+├── Navbars (10)
+├── Carousels (10)
+├── Cards (20)
+├── Buttons (15)
+├── Forms (10)
+├── Tables (10)
+├── Sidebars (10)
+└── Dashboards (5)
+
+1. Navbars (10 Designs)
+Navbar1 - Basic Navbar
+Navbar2 - Transparent Navbar
+Navbar3 - Sticky Navbar
+Navbar4 - E-Commerce Navbar
+Navbar5 - Center Logo Navbar
+Navbar6 - Mega Menu Navbar
+Navbar7 - Dashboard Navbar
+Navbar8 - Glassmorphism Navbar
+Navbar9 - Gradient Navbar
+Navbar10 - Mobile Drawer Navbar
+2. Carousels (10 Designs)
+Carousel1 - Basic Slider
+Carousel2 - Auto Scroll
+Carousel3 - Hero Banner
+Carousel4 - Product Slider
+Carousel5 - Multi Card Slider
+Carousel6 - Testimonial Slider
+Carousel7 - Infinite Loop Slider
+Carousel8 - Vertical Slider
+Carousel9 - Coverflow Slider
+Carousel10 - Fullscreen Slider
+3. Cards (20 Designs)
+Card1 - Profile Card
+Card2 - Employee Card
+Card3 - Product Card
+Card4 - Blog Card
+Card5 - Pricing Card
+Card6 - Statistics Card
+Card7 - Team Card
+Card8 - Testimonial Card
+Card9 - Service Card
+Card10 - Feature Card
+Card11 - Glass Card
+Card12 - Gradient Card
+Card13 - Dashboard Card
+Card14 - User Info Card
+Card15 - Event Card
+Card16 - Course Card
+Card17 - News Card
+Card18 - Job Card
+Card19 - Project Card
+Card20 - Portfolio Card
+4. Buttons (15 Designs)
+Button1 - Primary Button
+Button2 - Secondary Button
+Button3 - Outline Button
+Button4 - Gradient Button
+Button5 - Icon Button
+Button6 - Loading Button
+Button7 - Animated Button
+Button8 - Neon Button
+Button9 - Glass Button
+Button10 - Floating Button
+Button11 - Social Button
+Button12 - Rounded Button
+Button13 - Shadow Button
+Button14 - Ripple Button
+Button15 - 3D Button
+5. Forms (10 Designs)
+Form1 - Login Form
+Form2 - Registration Form
+Form3 - Contact Form
+Form4 - Forgot Password
+Form5 - OTP Verification
+Form6 - Employee Form
+Form7 - Feedback Form
+Form8 - Leave Request Form
+Form9 - Multi Step Form
+Form10 - Subscription Form
+6. Tables (10 Designs)
+Table1 - Basic Table
+Table2 - Responsive Table
+Table3 - Employee Table
+Table4 - Data Table
+Table5 - Dark Table
+Table6 - Pricing Table
+Table7 - Attendance Table
+Table8 - Leave Table
+Table9 - Search Table
+Table10 - Pagination Table
+7. Sidebars (10 Designs)
+Sidebar1 - Basic Sidebar
+Sidebar2 - Collapsible Sidebar
+Sidebar3 - Admin Sidebar
+Sidebar4 - Dark Sidebar
+Sidebar5 - Gradient Sidebar
+Sidebar6 - Icon Sidebar
+Sidebar7 - Mobile Sidebar
+Sidebar8 - Floating Sidebar
+Sidebar9 - Glass Sidebar
+Sidebar10 - Multi Level Sidebar
+8. Dashboards (5 Designs)
+Dashboard1 - Admin Dashboard
+Dashboard2 - Employee Dashboard
+Dashboard3 - Analytics Dashboard
+Dashboard4 - E-Commerce Dashboard
+Dashboard5 - CRM Dashboard
+Suggested Folder Structure
+src/
+│
+├── components/
+│   ├── navbars/
+│   ├── carousels/
+│   ├── cards/
+│   ├── buttons/
+│   ├── forms/
+│   ├── tables/
+│   ├── sidebars/
+│   └── dashboards/
+│
+├── pages/
+│   ├── NavbarsPage.jsx
+│   ├── CarouselsPage.jsx
+│   ├── CardsPage.jsx
+│   ├── ButtonsPage.jsx
+│   ├── FormsPage.jsx
+│   ├── TablesPage.jsx
+│   ├── SidebarsPage.jsx
+│   └── DashboardsPage.jsx
+Recommended Build Order
+Step 1 → Buttons
+Step 2 → Cards
+Step 3 → Navbars
+Step 4 → Forms
+Step 5 → Tables
+Step 6 → Carousels
+Step 7 → Sidebars
+Step 8 → Dashboards
