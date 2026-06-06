@@ -1,0 +1,26 @@
+src/ ├── assets/ │ ├── css/ │ │ ├── variables.css │ │ ├── global.css │ │ ├──
+navbar.css │ │ ├── sidebar.css │ │ ├── buttons.css │ │ ├── cards.css │ │ └──
+animations.css components/ │ ├── Navbar.jsx │ ├── Sidebar.jsx │ ├── Footer.jsx │
+├── ServiceCard.jsx │ ├── layouts/ │ └── MainLayout.jsx │ ├── pages/ │ ├──
+Home.jsx │ ├── About.jsx │ ├── Services.jsx │ ├── Projects.jsx │ ├── Careers.jsx
+│ ├── Contact.jsx │ ├── Login.jsx │ └── Dashboard.jsx 🏠 Home 👨‍💼 About ⚙️
+Services 📁 Projects 💼 Careers 📞 Contact 🔐 Login Page Transition Animation
+Using Framer Motion:
+
+<motion.div
+  initial="{{opacity:0,y:40}}"
+  animate="{{opacity:1,y:0}}"
+  transition="{{duration:0.5}}"
+>
+  <Home />
+</motion.div>
+
+Home Page Sections Hero Section Company Overview Our Services Why Choose Us
+Technologies Projects Showcase Client Testimonials Contact CTA Footer About Page
+Sections Company Introduction Mission Vision Core Values Team Achievements
+Services Page Sections Web Development Mobile Development ERP Solutions Cloud
+Services UI/UX Design Support & Maintenance Projects Page All Projects Grid
+Project Details Popup Technology Used Client Reviews Careers Page Open Positions
+Benefits Work Culture Apply Form Contact Page Company Address Contact Form
+Google Map Email Phone Company Branding Email Password Remember Me Login Button
+Forgot Password

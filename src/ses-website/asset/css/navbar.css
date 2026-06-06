@@ -1,0 +1,251 @@
+/* =========================
+   Navbar
+========================= */
+
+.navbar {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  padding: 12px 0;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* =========================
+   Logo
+========================= */
+
+.logo img {
+  height: 55px;
+  transition: 0.4s ease;
+}
+
+.logo:hover img {
+  transform: scale(1.05);
+}
+
+/* =========================
+   Desktop Menu
+========================= */
+
+.desktop-menu {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.desktop-menu a {
+  text-decoration: none;
+  color: #4f63a6;
+  font-weight: 600;
+  position: relative;
+  transition: 0.3s ease;
+}
+
+.desktop-menu a:hover,
+.desktop-menu a.active {
+  color: #e67d4b;
+}
+
+/* Underline Effect */
+
+.desktop-menu a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 0;
+  height: 3px;
+  background: #e67d4b;
+  border-radius: 20px;
+  transform: translateX(-50%);
+  transition: 0.3s ease;
+}
+
+.desktop-menu a:hover::after,
+.desktop-menu a.active::after {
+  width: 80%;
+}
+
+/* =========================
+   Login Button
+========================= */
+
+.login-btn {
+  background: #4f63a6;
+  color: white !important;
+  padding: 10px 20px;
+  border-radius: 30px;
+  transition: 0.3s ease;
+}
+
+.login-btn:hover {
+  background: #e67d4b;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Mobile Menu Button
+========================= */
+
+.menu-btn {
+  display: none;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  color: #4f63a6;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.menu-btn:hover {
+  color: #e67d4b;
+  transform: scale(1.1);
+}
+
+/* =========================
+   Sidebar
+========================= */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 300px;
+  height: 100vh;
+  background: white;
+  z-index: 10000;
+  transition: all 0.5s ease;
+  box-shadow: 5px 0 30px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar.active {
+  left: 0;
+}
+
+/* =========================
+   Sidebar Header
+========================= */
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-header img {
+  height: 45px;
+}
+
+/* =========================
+   Close Button
+========================= */
+
+.close-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.close-icon {
+  font-size: 28px;
+  color: #4f63a6;
+  display: inline-block;
+  transition:
+    transform 1s ease,
+    color 0.3s ease;
+}
+
+/* Hover on X icon */
+
+.close-icon:hover {
+  transform: rotate(360deg);
+  color: #e67d4b;
+}
+
+/* =========================
+   Sidebar Menu
+========================= */
+
+.sidebar-menu {
+  list-style: none;
+  padding: 20px;
+}
+
+.sidebar-menu li {
+  margin-bottom: 12px;
+}
+
+.sidebar-menu a {
+  display: block;
+  text-decoration: none;
+  color: #4f63a6;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.sidebar-menu a:hover {
+  background: #4f63a6;
+  color: white;
+  transform: translateX(10px);
+}
+
+.sidebar-login {
+  background: #4f63a6;
+  color: white !important;
+  text-align: center;
+}
+
+.sidebar-login:hover {
+  background: #e67d4b !important;
+}
+
+/* =========================
+   Overlay
+========================= */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================
+   Mobile
+========================= */
+
+@media (max-width: 991px) {
+  .desktop-menu {
+    display: none;
+  }
+
+  .menu-btn {
+    display: block;
+  }
+
+  .logo img {
+    height: 45px;
+  }
+}

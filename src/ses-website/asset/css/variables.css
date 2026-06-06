@@ -1,0 +1,18 @@
+:root {
+  --primary: #4f63a6;
+  --secondary: #e67d4b;
+
+  --bg: #ffffff;
+  --text: #101828;
+
+  --border: #e4e7ec;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  --transition: all 0.3s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #ffffff;
+  --border: #334155;
+}
