@@ -15,6 +15,9 @@ function Navbar() {
           {/* Logo */}
           <NavLink className="logo" to="/">
             <img src={logo} alt="SES Logo" />
+            <h3>
+              <span>Soft</span> Electronic <span>Solutions</span>
+            </h3>
           </NavLink>
 
           {/* Desktop Menu */}

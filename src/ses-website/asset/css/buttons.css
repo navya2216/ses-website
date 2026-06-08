@@ -1,29 +1,205 @@
-.btn {
-  padding: 12px 28px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-  font-weight: 600;
-}
+/* ======================================
+   PRIMARY BUTTON
+====================================== */
 
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 14px 32px;
+
   background: var(--primary);
-  color: #fff;
+  color: var(--white);
+
+  border-radius: 50px;
+
+  font-weight: 600;
+  font-size: 15px;
+
+  transition: var(--transition);
+
+  position: relative;
+  overflow: hidden;
+
+  z-index: 1;
+}
+
+.btn-primary::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: -100%;
+
+  width: 100%;
+  height: 100%;
+
+  background: var(--secondary);
+
+  transition: 0.5s ease;
+
+  z-index: -1;
+}
+
+.btn-primary:hover::before {
+  left: 0;
 }
 
 .btn-primary:hover {
-  background: var(--secondary);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  color: white;
 }
 
-.btn-outline {
-  background: transparent;
+/* ======================================
+   SECONDARY BUTTON
+====================================== */
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 14px 32px;
+
   border: 2px solid var(--primary);
+
   color: var(--primary);
+
+  border-radius: 50px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+
+  transform: translateY(-4px);
+}
+
+/* ======================================
+   OUTLINE BUTTON
+====================================== */
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 14px 32px;
+
+  border: 2px solid var(--secondary);
+
+  color: var(--secondary);
+
+  border-radius: 50px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
 }
 
 .btn-outline:hover {
+  background: var(--secondary);
+  color: white;
+
+  transform: translateY(-4px);
+}
+
+/* ======================================
+   GRADIENT BUTTON
+====================================== */
+
+.btn-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 14px 32px;
+
+  border-radius: 50px;
+
+  color: white;
+
+  font-weight: 600;
+
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+  transition: var(--transition);
+}
+
+.btn-gradient:hover {
+  transform: translateY(-4px) scale(1.03);
+
+  box-shadow: 0 15px 35px rgba(79, 99, 166, 0.3);
+}
+
+/* ======================================
+   ICON BUTTON
+====================================== */
+
+.btn-icon {
+  width: 55px;
+  height: 55px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--primary);
+
+  color: white;
+
+  font-size: 20px;
+
+  transition: var(--transition);
+}
+
+.btn-icon:hover {
+  background: var(--secondary);
+
+  transform: rotate(360deg);
+}
+
+/* ======================================
+   LOGIN BUTTON
+====================================== */
+
+.btn-login {
   background: var(--primary);
   color: white;
+
+  padding: 12px 28px;
+
+  border-radius: 30px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.btn-login:hover {
+  background: var(--secondary);
+
+  transform: translateY(-3px);
+}
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  .btn-gradient {
+    width: 100%;
+    padding: 12px 20px;
+  }
 }

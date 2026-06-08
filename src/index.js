@@ -4,6 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+
+// import "./asset/css/variables.css";
+import "./ses-website/asset/css/global.css";
+import "./ses-website/asset/css/page-hero.css";
 // import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

@@ -1,34 +1,54 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-  FaFacebook,
-  FaLinkedin,
+  FaFacebookF,
+  FaLinkedinIn,
   FaInstagram,
+  FaPhoneAlt,
   FaEnvelope,
-  FaPhone,
   FaMapMarkerAlt,
 } from "react-icons/fa";
 
+import logo from "../asset/ses_logo.png";
 import "../asset/css/footer.css";
 
 function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <div className="row gy-4">
-          {/* Company */}
-          <div className="col-lg-4 col-md-6">
-            <h3 className="footer-logo">Soft Electronic Solutions</h3>
+        <div className="row g-4">
+          {/* Company Info */}
 
-            <p>
-              Delivering innovative software solutions, web applications,
-              enterprise systems, and digital transformation services.
-            </p>
+          <div className="col-lg-4 col-md-6">
+            <div className="footer-about">
+              <img src={logo} alt="SES Logo" className="footer-logo-img" />
+
+              <p>
+                Soft Electronic Solutions provides innovative software
+                development, embedded systems, hardware solutions, and digital
+                transformation services for businesses worldwide.
+              </p>
+
+              <div className="social-icons">
+                <a href="/">
+                  <FaFacebookF />
+                </a>
+
+                <a href="/">
+                  <FaLinkedinIn />
+                </a>
+
+                <a href="/">
+                  <FaInstagram />
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Quick Links */}
+
           <div className="col-lg-2 col-md-6">
-            <h5>Quick Links</h5>
+            <h4>Quick Links</h4>
 
             <ul className="footer-links">
               <li>
@@ -46,59 +66,56 @@ function Footer() {
               <li>
                 <Link to="/careers">Careers</Link>
               </li>
+              <li>
+                <Link to="/contact">Contact</Link>
+              </li>
             </ul>
           </div>
 
           {/* Services */}
+
           <div className="col-lg-3 col-md-6">
-            <h5>Services</h5>
+            <h4>Services</h4>
 
             <ul className="footer-links">
               <li>Web Development</li>
-              <li>Mobile Apps</li>
+              <li>Mobile Applications</li>
               <li>ERP Solutions</li>
-              <li>UI/UX Design</li>
-              <li>Cloud Solutions</li>
+              <li>Embedded Systems</li>
+              <li>Hardware Design</li>
+              <li>Cloud Services</li>
             </ul>
           </div>
 
           {/* Contact */}
+
           <div className="col-lg-3 col-md-6">
-            <h5>Contact</h5>
+            <h4>Contact Us</h4>
 
-            <p>
-              <FaMapMarkerAlt /> Anantapur, Andhra Pradesh
-            </p>
+            <div className="contact-item">
+              <FaMapMarkerAlt />
+              <span>Anantapur, Andhra Pradesh</span>
+            </div>
 
-            <p>
-              <FaPhone /> +91 XXXXX XXXXX
-            </p>
+            <div className="contact-item">
+              <FaPhoneAlt />
+              <span>+91 XXXXX XXXXX</span>
+            </div>
 
-            <p>
-              <FaEnvelope /> info@ses.com
-            </p>
-
-            <div className="social-icons">
-              <a href="/">
-                <FaFacebook />
-              </a>
-
-              <a href="/">
-                <FaLinkedin />
-              </a>
-
-              <a href="/">
-                <FaInstagram />
-              </a>
+            <div className="contact-item">
+              <FaEnvelope />
+              <span>info@ses.com</span>
             </div>
           </div>
         </div>
 
-        <hr />
+        <div className="footer-divider"></div>
 
         <div className="footer-bottom">
-          © {new Date().getFullYear()} Soft Electronic Solutions. All Rights
-          Reserved.
+          <p>
+            © {new Date().getFullYear()} Soft Electronic Solutions. All Rights
+            Reserved.
+          </p>
         </div>
       </div>
     </footer>

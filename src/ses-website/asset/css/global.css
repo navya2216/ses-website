@@ -1,8 +1,47 @@
-* {
+/* ======================================
+   GOOGLE FONT
+====================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+/* ======================================
+   RESET
+====================================== */
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
+/* ======================================
+   ROOT VARIABLES
+====================================== */
+
+:root {
+  --primary: #4f63a6;
+  --secondary: #e67d4b;
+
+  --dark: #101828;
+  --light: #f8faff;
+
+  --text: #667085;
+  --white: #ffffff;
+
+  --shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  --radius: 16px;
+
+  --transition: all 0.3s ease;
+}
+
+/* ======================================
+   HTML & BODY
+====================================== */
 
 html {
   scroll-behavior: smooth;
@@ -10,16 +49,390 @@ html {
 
 body {
   font-family: "Poppins", sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--light);
+  color: var(--dark);
+  overflow-x: hidden;
+  line-height: 1.6;
 }
+
+/* ======================================
+   CONTAINER
+====================================== */
 
 .container {
   width: 90%;
   max-width: 1400px;
-  margin: auto;
+  margin: 0 auto;
 }
 
+/* ======================================
+   SECTION SPACING
+====================================== */
+
 .section {
-  padding: 80px 0;
+  padding: 100px 0;
+}
+
+/* ======================================
+   IMAGES
+====================================== */
+
+img {
+  max-width: 100%;
+  display: block;
+  height: auto;
+}
+
+/* ======================================
+   LINKS
+====================================== */
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+/* ======================================
+   LISTS
+====================================== */
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ======================================
+   BUTTONS
+====================================== */
+
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ======================================
+   INPUTS
+====================================== */
+
+input,
+textarea,
+select {
+  outline: none;
+  font-family: inherit;
+}
+
+/* ======================================
+   HEADINGS
+====================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--dark);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 3.8rem;
+}
+
+h2 {
+  font-size: 3rem;
+}
+
+h3 {
+  font-size: 2rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+p {
+  color: var(--text);
+  line-height: 1.8;
+}
+
+/* ======================================
+   SECTION TITLE
+====================================== */
+
+.section-title {
+  text-align: center;
+  margin-bottom: 70px;
+}
+
+.section-title span {
+  color: var(--secondary);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.section-title h2 {
+  margin-top: 15px;
+  color: var(--primary);
+}
+
+.section-title p {
+  max-width: 700px;
+  margin: 15px auto 0;
+}
+
+/* ======================================
+   COMMON BUTTONS
+====================================== */
+
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: var(--primary);
+  color: white;
+
+  padding: 14px 30px;
+
+  border-radius: 50px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.primary-btn:hover {
+  background: var(--secondary);
+
+  transform: translateY(-3px);
+
+  color: white;
+}
+
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: transparent;
+
+  color: var(--primary);
+
+  border: 2px solid var(--primary);
+
+  padding: 14px 30px;
+
+  border-radius: 50px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.secondary-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ======================================
+   COMMON CARDS
+====================================== */
+
+.card-style {
+  background: white;
+
+  border-radius: var(--radius);
+
+  padding: 30px;
+
+  box-shadow: var(--shadow-sm);
+
+  transition: var(--transition);
+}
+
+.card-style:hover {
+  transform: translateY(-10px);
+
+  box-shadow: var(--shadow-lg);
+}
+
+/* ======================================
+   ANIMATIONS
+====================================== */
+
+.fade-up {
+  animation: fadeUp 0.8s ease forwards;
+}
+
+.fade-left {
+  animation: fadeLeft 0.8s ease forwards;
+}
+
+.fade-right {
+  animation: fadeRight 0.8s ease forwards;
+}
+
+.zoom-in {
+  animation: zoomIn 0.8s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ======================================
+   CUSTOM SCROLLBAR
+====================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf2ff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 30px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* ======================================
+   TEXT SELECTION
+====================================== */
+
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+/* ======================================
+   TABLET
+====================================== */
+
+@media (max-width: 991px) {
+  .section {
+    padding: 80px 0;
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2.3rem;
+  }
+
+  h3 {
+    font-size: 1.8rem;
+  }
+}
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media (max-width: 768px) {
+  .section {
+    padding: 70px 0;
+  }
+
+  h1 {
+    font-size: 2.3rem;
+  }
+
+  h2 {
+    font-size: 1.9rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    margin-bottom: 50px;
+  }
+
+  .container {
+    width: 94%;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+}
+
+/* ======================================
+   SMALL MOBILE
+====================================== */
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.7rem;
+  }
+
+  p {
+    font-size: 14px;
+  }
 }

@@ -1,0 +1,117 @@
+/* =========================
+   MAIN LAYOUT
+========================= */
+
+.layout-wrapper {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   PAGE CONTENT
+========================= */
+
+.main-content {
+  flex: 1;
+
+  min-height: calc(100vh - 160px);
+
+  overflow-x: hidden;
+}
+
+/* =========================
+   PAGE BANNER
+========================= */
+
+.page-banner {
+  padding: 140px 0 80px;
+
+  background: linear-gradient(135deg, #4f63a6, #324785);
+
+  color: white;
+
+  text-align: center;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+.page-banner::before {
+  content: "";
+
+  position: absolute;
+
+  width: 300px;
+  height: 300px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  border-radius: 50%;
+
+  top: -100px;
+  right: -100px;
+}
+
+.page-banner::after {
+  content: "";
+
+  position: absolute;
+
+  width: 250px;
+  height: 250px;
+
+  background: rgba(230, 125, 75, 0.12);
+
+  border-radius: 50%;
+
+  bottom: -100px;
+  left: -100px;
+}
+
+.page-banner h1 {
+  color: white;
+  margin-bottom: 15px;
+}
+
+.page-banner p {
+  color: rgba(255, 255, 255, 0.85);
+
+  max-width: 700px;
+
+  margin: auto;
+}
+
+/* =========================
+   PAGE SECTION
+========================= */
+
+.page-section {
+  padding: 100px 0;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 991px) {
+  .page-banner {
+    padding: 120px 0 70px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .page-banner {
+    padding: 100px 0 60px;
+  }
+
+  .page-section {
+    padding: 70px 0;
+  }
+}

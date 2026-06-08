@@ -18,16 +18,128 @@
 /* =========================
    Logo
 ========================= */
+/* =========================
+   Logo
+========================= */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
 
 .logo img {
   height: 55px;
-  transition: 0.4s ease;
+  transition: all 0.4s ease;
 }
 
 .logo:hover img {
   transform: scale(1.05);
 }
 
+/* Logo Text */
+
+.logo h3 {
+  position: relative;
+
+  margin: 0;
+
+  padding: 10px 22px;
+
+  font-size: 1.15rem;
+  font-weight: 800;
+
+  color: #4f63a6;
+
+  border-radius: 50px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+
+  z-index: 1;
+}
+
+/* Rotating Blue Orange Border */
+
+.logo h3::before {
+  content: "";
+
+  position: absolute;
+
+  top: -250%;
+  left: -250%;
+
+  width: 600%;
+  height: 600%;
+
+  background: conic-gradient(#4f63a6, #e67d4b, #4f63a6, #e67d4b, #4f63a6);
+
+  animation: borderRotate 5s linear infinite;
+
+  z-index: -2;
+}
+
+/* White Center */
+
+.logo h3::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 2px;
+
+  background: white;
+
+  border-radius: 48px;
+
+  z-index: -1;
+}
+
+/* SES Brand Colors */
+
+.logo h3 span {
+  color: #e67d4b;
+  transition: all 0.4s ease;
+}
+
+/* Hover Text Effect */
+
+.logo:hover h3 {
+  color: #e67d4b;
+}
+
+.logo:hover h3 span {
+  color: #4f63a6;
+}
+
+/* Border Rotation Animation */
+
+@keyframes borderRotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 991px) {
+  .logo img {
+    height: 45px;
+  }
+
+  .logo h3 {
+    font-size: 1rem;
+    padding: 8px 18px;
+  }
+}
+
+@media (max-width: 576px) {
+  .logo h3 {
+    display: none;
+  }
+}
 /* =========================
    Desktop Menu
 ========================= */
