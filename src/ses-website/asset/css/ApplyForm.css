@@ -1,0 +1,141 @@
+/* ==========================
+   APPLY FORM
+========================== */
+
+.apply-form {
+  max-width: 750px;
+  margin: auto;
+
+  background: #fff;
+
+  padding: 40px;
+
+  border-radius: 24px;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+.input-group {
+  margin-bottom: 18px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+
+  padding: 15px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 12px;
+
+  transition: 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #4f63a6;
+
+  box-shadow: 0 0 0 4px rgba(79, 99, 166, 0.12);
+
+  outline: none;
+}
+
+/* ==========================
+   FILE UPLOAD
+========================== */
+
+.upload-box {
+  border: 2px dashed #4f63a6;
+
+  border-radius: 14px;
+
+  padding: 20px;
+
+  margin-bottom: 20px;
+
+  background: #f8faff;
+}
+
+.upload-box label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-weight: 600;
+
+  color: #4f63a6;
+}
+
+/* ==========================
+   BUTTON
+========================== */
+
+.submit-btn {
+  width: 100%;
+
+  border: none;
+
+  padding: 16px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #4f63a6, #6479c0);
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.35s;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #e67d4b, #f09160);
+
+  transform: translateY(-3px);
+
+  box-shadow: 0 15px 30px rgba(230, 125, 75, 0.25);
+}
+
+/* ==========================
+   SUCCESS
+========================== */
+
+.success-message {
+  margin-top: 20px;
+
+  background: #e8fff1;
+
+  color: #15803d;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  font-weight: 600;
+}
+
+/* ==========================
+   ERROR
+========================== */
+
+.error-message {
+  margin-top: 20px;
+
+  background: #fff1f2;
+
+  color: #dc2626;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  font-weight: 600;
+}

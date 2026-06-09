@@ -1,0 +1,262 @@
+/* ===================================
+   PARTNERS SECTION
+=================================== */
+
+.partners-section {
+  padding: 100px 0;
+  background: #f8faff;
+}
+
+/* ===================================
+   SECTION TITLE
+=================================== */
+
+.section-title {
+  max-width: 850px;
+  margin: 0 auto 70px;
+  text-align: center;
+}
+
+.section-title h2 {
+  font-size: 42px;
+  font-weight: 700;
+  color: #4f63a6;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.section-title h2::after {
+  content: "";
+  width: 80px;
+  height: 4px;
+  background: #e67d4b;
+  display: block;
+  margin: 15px auto 0;
+  border-radius: 20px;
+}
+
+.section-title p {
+  color: #666;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ===================================
+   CATEGORY GRID
+=================================== */
+
+.partner-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+}
+
+/* ===================================
+   CATEGORY CARD
+=================================== */
+
+.partner-category-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.4s ease;
+}
+
+.partner-category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 45px rgba(79, 99, 166, 0.18);
+}
+
+/* ===================================
+   CATEGORY HEADER
+=================================== */
+
+.category-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.category-header h3 {
+  color: #4f63a6;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.category-header p {
+  color: #777;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===================================
+   PARTNER LOGO GRID
+=================================== */
+
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+/* ===================================
+   LOGO CARD
+=================================== */
+
+.partner-card {
+  position: relative;
+
+  background: #f8faff;
+
+  border-radius: 16px;
+
+  height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  border: 1px solid #edf1ff;
+
+  transition: all 0.4s ease;
+}
+
+.partner-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ===================================
+   LOGO IMAGE
+=================================== */
+
+.partner-card img {
+  width: 75%;
+  height: 65px;
+  object-fit: contain;
+
+  transition: all 0.4s ease;
+}
+
+.partner-card:hover img {
+  transform: scale(1.12);
+}
+
+/* ===================================
+   OVERLAY
+=================================== */
+
+.partner-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    135deg,
+    rgba(79, 99, 166, 0.96),
+    rgba(230, 125, 75, 0.96)
+  );
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 15px;
+
+  opacity: 0;
+
+  transition: all 0.4s ease;
+}
+
+.partner-card:hover .partner-overlay {
+  opacity: 1;
+}
+
+.partner-overlay h4 {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.partner-overlay p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ===================================
+   ANIMATION
+=================================== */
+
+.partner-category-card {
+  animation: fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   TABLET
+=================================== */
+
+@media (max-width: 992px) {
+  .partner-categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-title h2 {
+    font-size: 36px;
+  }
+}
+
+/* ===================================
+   MOBILE
+=================================== */
+
+@media (max-width: 768px) {
+  .partner-categories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title h2 {
+    font-size: 30px;
+  }
+
+  .partner-category-card {
+    padding: 20px;
+  }
+
+  .partner-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===================================
+   SMALL MOBILE
+=================================== */
+
+@media (max-width: 480px) {
+  .partner-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .partner-card {
+    height: 100px;
+  }
+}

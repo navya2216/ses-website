@@ -1,0 +1,94 @@
+/* ======================================
+   FLOATING ADMIN BUTTON
+====================================== */
+
+.admin-float {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  z-index: 999;
+  animation: floatUp 2.5s ease-in-out infinite;
+}
+
+.admin-float a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  text-decoration: none;
+  color: #fff;
+
+  background: linear-gradient(135deg, #4f63a6, #6378c5);
+
+  padding: 14px 26px;
+  border-radius: 50px;
+
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+
+  box-shadow: 0 12px 30px rgba(79, 99, 166, 0.35);
+
+  transition: all 0.35s ease;
+}
+
+.admin-float a:hover {
+  transform: translateY(-6px) scale(1.05);
+
+  background: linear-gradient(135deg, #e67d4b, #f39c6b);
+
+  box-shadow: 0 18px 40px rgba(230, 125, 75, 0.35);
+}
+
+.admin-float a:active {
+  transform: scale(0.96);
+}
+
+/* Glow Effect */
+
+.admin-float a::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50px;
+  background: linear-gradient(
+    135deg,
+    rgba(79, 99, 166, 0.3),
+    rgba(230, 125, 75, 0.3)
+  );
+  z-index: -1;
+  filter: blur(10px);
+  opacity: 0;
+  transition: 0.4s;
+}
+
+.admin-float a:hover::before {
+  opacity: 1;
+}
+
+/* Floating Animation */
+
+@keyframes floatUp {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+  .admin-float {
+    right: 15px;
+    bottom: 15px;
+  }
+
+  .admin-float a {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+}

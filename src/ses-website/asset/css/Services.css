@@ -1,79 +1,46 @@
-/* ===========================
+/* ==========================
    SERVICES SECTION
-=========================== */
+========================== */
 
 .services-section {
-  padding: 10px 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
-  overflow: hidden;
+  padding: 100px 0;
 }
 
-/* ===========================
-   SECTION HEADER
-=========================== */
-
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header span {
-  color: #e67d4b;
-  font-weight: 700;
-  font-size: 28px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  display: inline-block;
-  margin-bottom: 15px;
-}
-
-.section-header h2 {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #4f63a6;
-  margin-bottom: 20px;
-}
-
-.section-header p {
-  max-width: 750px;
-  margin: auto;
-  color: #667085;
-  font-size: 1.05rem;
-  line-height: 1.8;
-}
-
-/* ===========================
+/* ==========================
    SERVICE CARD
-=========================== */
+========================== */
 
 .service-card {
   position: relative;
-  height: 100%;
-  padding: 40px 30px;
-  border-radius: 25px;
   overflow: hidden;
+
+  height: 100%;
+
+  padding: 40px 30px;
+
+  border-radius: 30px;
+
+  transition: 0.5s ease;
+
   z-index: 1;
-  background: transparent;
-  transition: all 0.5s ease;
 }
 
 /* Rotating Border */
 
 .service-card::before {
   content: "";
+
   position: absolute;
 
-  width: 220%;
-  height: 220%;
+  width: 260%;
+  height: 260%;
 
-  top: -60%;
-  left: -60%;
-  border-radius: 50%;
-  /* background-color: #e45d03; */
+  top: -80%;
+  left: -80%;
 
-  background: conic-gradient(#4f63a6, #4f63a6, #e67d4b, #e67d4b);
+  background: conic-gradient(#4f63a6, #e67d4b, #4f63a6, #e67d4b, #4f63a6);
 
-  animation: rotateBorder 5s linear infinite;
+  animation: rotateBorder 6s linear infinite;
 
   z-index: -2;
 }
@@ -84,17 +51,18 @@
   }
 }
 
-/* Inner White Card */
+/* Inner Card */
 
 .service-card::after {
   content: "";
+
   position: absolute;
 
-  inset: 6px;
+  inset: 5px;
 
   background: white;
 
-  border-radius: 22px;
+  border-radius: 26px;
 
   z-index: -1;
 }
@@ -103,11 +71,15 @@
 
 .service-card:hover {
   transform: translateY(-15px);
+
+  box-shadow:
+    0 20px 40px rgba(79, 99, 166, 0.15),
+    0 0 30px rgba(230, 125, 75, 0.2);
 }
 
-/* ===========================
+/* ==========================
    ICON
-=========================== */
+========================== */
 
 .service-icon {
   width: 95px;
@@ -119,111 +91,53 @@
 
   border-radius: 50%;
 
-  font-size: 42px;
-
   background: #4f63a6;
 
-  color: #e67d4b;
+  font-size: 42px;
 
   margin-bottom: 25px;
 
-  transition: all 0.8s ease;
+  transition: 0.8s ease;
 }
-
-/* Icon Hover */
 
 .service-card:hover .service-icon {
   background: #e67d4b;
-  color: #4f63a6;
 
   transform: rotate(360deg) scale(1.15);
 
   box-shadow:
-    0 0 20px rgba(230, 125, 75, 0.4),
+    0 0 20px rgba(230, 125, 75, 0.5),
     0 0 40px rgba(79, 99, 166, 0.3);
 }
 
-/* ===========================
+/* ==========================
    TITLE
-=========================== */
+========================== */
 
 .service-card h3 {
   color: #4f63a6;
-  font-size: 1.5rem;
-  font-weight: 700;
+
   margin-bottom: 15px;
-  transition: 0.4s;
+
+  transition: 0.4s ease;
 }
 
 .service-card:hover h3 {
   color: #e67d4b;
 }
 
-/* ===========================
+/* ==========================
    TEXT
-=========================== */
+========================== */
 
 .service-card p {
   color: #667085;
   line-height: 1.8;
 }
 
-/* ===========================
-   GLOW EFFECT
-=========================== */
-
-.service-card:hover {
-  box-shadow:
-    0 0 15px rgba(79, 99, 166, 0.25),
-    0 0 35px rgba(230, 125, 75, 0.15),
-    0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-/* ===========================
-   FLOATING ANIMATION
-=========================== */
-
-.service-card {
-  animation: floatCard 5s ease-in-out infinite;
-}
-
-@keyframes floatCard {
-  0% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-8px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-/* ===========================
-   HEADER ANIMATION
-=========================== */
-
-.section-header {
-  animation: fadeDown 1s ease;
-}
-
-@keyframes fadeDown {
-  from {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ===========================
-   CARD ENTRY ANIMATION
-=========================== */
+/* ==========================
+   FLOAT ANIMATION
+========================== */
 
 .service-card {
   animation:
@@ -243,29 +157,31 @@
   }
 }
 
-/* ===========================
+@keyframes floatCard {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
    RESPONSIVE
-=========================== */
+========================== */
 
 @media (max-width: 991px) {
   .services-section {
     padding: 80px 0;
   }
-
-  .section-header h2 {
-    font-size: 2.3rem;
-  }
-
-  .service-card {
-    margin-bottom: 20px;
-  }
 }
 
 @media (max-width: 576px) {
-  .section-header h2 {
-    font-size: 1.8rem;
-  }
-
   .service-card {
     padding: 30px 20px;
   }
@@ -273,6 +189,7 @@
   .service-icon {
     width: 80px;
     height: 80px;
-    font-size: 35px;
+
+    font-size: 34px;
   }
 }
