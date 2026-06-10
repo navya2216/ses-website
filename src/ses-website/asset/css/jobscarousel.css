@@ -1,6 +1,11 @@
 /* =========================
-   SECTION HEADER
+   SECTION
 ========================= */
+
+.jobs-section {
+  padding: 80px 0;
+  overflow: hidden;
+}
 
 .section-header {
   text-align: center;
@@ -31,118 +36,35 @@
 }
 
 /* =========================
-   CAROUSEL
+   AUTO CAROUSEL
 ========================= */
 
-.carousel {
+.carousel-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-track {
   display: flex;
   gap: 25px;
-  overflow-x: auto;
-  padding: 20px;
-  scroll-behavior: smooth;
+  width: max-content;
+
+  animation: scrollJobs 35s linear infinite;
 }
 
-.carousel::-webkit-scrollbar {
-  height: 8px;
+.carousel-wrapper:hover .carousel-track {
+  animation-play-state: paused;
 }
 
-.carousel::-webkit-scrollbar-thumb {
-  background: #4f63a6;
-  border-radius: 20px;
-}
+@keyframes scrollJobs {
+  from {
+    transform: translateX(0);
+  }
 
-/* =========================
-   CARD
-========================= */
-
-.job-card {
-  min-width: 340px;
-  max-width: 340px;
-
-  background: #fff;
-  padding: 25px;
-  border-radius: 20px;
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-
-  border-top: 5px solid #4f63a6;
-
-  transition: all 0.35s ease;
-}
-
-.job-card:hover {
-  transform: translateY(-10px);
-
-  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15);
-}
-
-.job-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 20px;
-}
-
-.job-card h3 {
-  color: #4f63a6;
-  font-size: 22px;
-}
-
-.job-badge {
-  background: rgba(230, 125, 75, 0.15);
-  color: #e67d4b;
-
-  padding: 6px 12px;
-  border-radius: 30px;
-
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.job-details {
-  margin-bottom: 15px;
-}
-
-.job-details p {
-  margin-bottom: 10px;
-}
-
-.job-desc {
-  color: #667085;
-  line-height: 1.6;
-  min-height: 90px;
-}
-
-/* =========================
-   BUTTON
-========================= */
-
-.apply-btn {
-  width: 100%;
-
-  padding: 14px;
-
-  border: none;
-
-  border-radius: 12px;
-
-  background: #4f63a6;
-  color: white;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: all 0.3s ease;
-}
-
-.apply-btn:hover {
-  background: #e67d4b;
-
-  transform: translateY(-3px);
-
-  box-shadow: 0 12px 25px rgba(230, 125, 75, 0.3);
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* =========================
@@ -150,18 +72,8 @@
 ========================= */
 
 .no-jobs {
-  width: 100%;
   text-align: center;
   padding: 50px;
   background: white;
   border-radius: 20px;
-}
-
-.no-jobs h3 {
-  color: #4f63a6;
-  margin-bottom: 10px;
-}
-
-.no-jobs p {
-  color: #667085;
 }

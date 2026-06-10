@@ -1,6 +1,10 @@
 import React from "react";
+import JobCard from "./JobCard";
 import "../../asset/css/jobscarousel.css";
+
 function JobsCarousel({ jobs = [] }) {
+  const loopJobs = jobs.length > 0 ? [...jobs, ...jobs] : [];
+
   return (
     <section className="jobs-section">
       <div className="section-header">
@@ -14,48 +18,20 @@ function JobsCarousel({ jobs = [] }) {
         </p>
       </div>
 
-      <div className="carousel">
-        {jobs.length > 0 ? (
-          jobs.map((job) => (
-            <div key={job.id} className="job-card">
-              <div className="job-card-top">
-                <h3>{job.role}</h3>
-
-                <span className="job-badge">{job.type}</span>
-              </div>
-
-              <div className="job-details">
-                <p>
-                  📍 <strong>Location:</strong> {job.location}
-                </p>
-
-                <p>
-                  💼 <strong>Type:</strong> {job.type}
-                </p>
-              </div>
-
-              <p className="job-desc">{job.description}</p>
-
-              <button
-                className="apply-btn"
-                onClick={() =>
-                  document
-                    .getElementById("apply")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                Apply Now →
-              </button>
-            </div>
-          ))
-        ) : (
-          <div className="no-jobs">
-            <h3>No Open Positions Available</h3>
-
-            <p>We are not hiring at the moment. Please check again later.</p>
+      {jobs.length > 0 ? (
+        <div className="carousel-wrapper">
+          <div className="carousel-track">
+            {loopJobs.map((job, index) => (
+              <JobCard key={`${job.id}-${index}`} job={job} />
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="no-jobs">
+          <h3>No Open Positions Available</h3>
+          <p>We are not hiring at the moment. Please check again later.</p>
+        </div>
+      )}
     </section>
   );
 }

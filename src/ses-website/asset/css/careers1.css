@@ -1,0 +1,79 @@
+.career-page {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Floating Admin Button */
+.admin-float {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 999;
+}
+
+.admin-float a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #0d6efd;
+  color: #fff;
+  text-decoration: none;
+
+  padding: 12px 18px;
+  border-radius: 50px;
+
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+  transition: 0.3s;
+}
+
+.admin-float a:hover {
+  background: #084298;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Job Section */
+.career-jobs {
+  padding: 70px 0;
+}
+
+/* Apply Section */
+.career-apply {
+  padding: 70px 0;
+}
+
+.apply-card {
+  max-width: 850px;
+  margin: auto;
+
+  background: #fff;
+  padding: 40px;
+
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.apply-card h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .admin-float {
+    right: 10px;
+    top: 90px;
+  }
+
+  .admin-float a {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .apply-card {
+    padding: 25px;
+  }
+}
