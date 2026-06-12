@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaLaptopCode, FaMicrochip, FaTools } from "react-icons/fa";
-
 import "../asset/css/projects.css";
 
 function Projects() {
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const projects = [
     {
       icon: <FaMicrochip />,
@@ -36,20 +37,15 @@ function Projects() {
 
   return (
     <>
-      {/* Hero */}
-
       <section className="page-hero">
         <div className="container">
           <h1>Our Projects</h1>
-
           <p>
             Showcasing our innovative work in software development and
             technology solutions.
           </p>
         </div>
       </section>
-
-      {/* Filter */}
 
       <section className="project-filter">
         <div className="container">
@@ -62,13 +58,15 @@ function Projects() {
         </div>
       </section>
 
-      {/* Projects */}
-
-      <section className="projects-section section">
+      <section className="projects-section">
         <div className="container">
           <div className="projects-grid">
             {projects.map((project, index) => (
-              <div className="project-card" key={index}>
+              <div
+                className="project-card"
+                key={index}
+                onClick={() => setSelectedProject(project)}
+              >
                 <div className="project-icon">{project.icon}</div>
 
                 <span className="project-category">{project.category}</span>
@@ -97,6 +95,22 @@ function Projects() {
               </div>
             ))}
           </div>
+
+          {selectedProject && (
+            <div className="project-details">
+              <h2>{selectedProject.title}</h2>
+
+              <p>{selectedProject.description}</p>
+
+              <h4>Technologies Used</h4>
+
+              <div className="details-tech">
+                {selectedProject.technologies.map((tech, i) => (
+                  <span key={i}>{tech}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </>

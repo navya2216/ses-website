@@ -1,46 +1,67 @@
 import React from "react";
 import "../asset/css/PartnersSection.css";
 
+import nvidia from "../asset/images/partners/nvidia.png";
+import sbl from "../asset/images/partners/sbl.png";
+import advantech from "../asset/images/partners/advantech.png";
+import xilinx from "../asset/images/partners/xilinx.png";
+import scientific from "../asset/images/partners/scientific.png";
+import siglent from "../asset/images/partners/siglent.png";
+
+import drdl from "../asset/images/partners/drdl.png";
+import bdl from "../asset/images/partners/bdl.png";
+import rci from "../asset/images/partners/rci.png";
+
+import magnarus from "../asset/images/partners/magnarus.png";
+import vaishnavi from "../asset/images/partners/vaishnavi.png";
+import sridatta from "../asset/images/partners/sridatta.png";
+import siliconEngineers from "../asset/images/partners/silicon-engineers.png";
+
+import saarc from "../asset/images/partners/saarc.png";
+import sridattaDmv from "../asset/images/partners/sridatta-dmv.png";
+import unitech from "../asset/images/partners/unitech.png";
+import rainbowWorks from "../asset/images/partners/rainbow-works.png";
+
 const partnerCategories = [
   {
     title: "Technology Partners",
     subtitle: "Collaborating with leading tech innovators",
     partners: [
-      "/images/partners/nvidia.png",
-      "/images/partners/sbl.png",
-      "/images/partners/advantech.png",
-      "/images/partners/xilinx.png",
-      "/images/partners/scientific.png",
-      "/images/partners/siglent.png",
+      { name: "NVIDIA", image: nvidia },
+      { name: "SBL", image: sbl },
+      { name: "ADVANTECH", image: advantech },
+      { name: "XILINX", image: xilinx },
+      { name: "SCIENTIFIC", image: scientific },
+      { name: "SIGLENT", image: siglent },
     ],
   },
   {
-    title: "Defensive Solutions",
-    subtitle: "Advanced defense and aerospace collaborations",
+    title: "Defence Solutions",
+    subtitle: "Advanced defence and aerospace collaborations",
     partners: [
-      "/images/partners/drdl.png",
-      "/images/partners/bdl.png",
-      "/images/partners/rci.png",
+      { name: "DRDL", image: drdl },
+      { name: "BDL", image: bdl },
+      { name: "RCI", image: rci },
     ],
   },
   {
     title: "Industrial Services",
-    subtitle: "Specialized solutions for industrial applications",
+    subtitle: "Specialized industrial service partners",
     partners: [
-      "/images/partners/magnarus.png",
-      "/images/partners/vaishnavi.png",
-      "/images/partners/sridatta.png",
-      "/images/partners/silicon.png",
+      { name: "MAGNARUS", image: magnarus },
+      { name: "VAISHNAVI", image: vaishnavi },
+      { name: "SRIDATTA", image: sridatta },
+      { name: "SILICON ENGINEERS", image: siliconEngineers },
     ],
   },
   {
     title: "Engineering Partners",
-    subtitle: "Collaborating with engineering specialists",
+    subtitle: "Trusted engineering and manufacturing partners",
     partners: [
-      "/images/partners/saarc.png",
-      "/images/partners/sridatta-dmv.png",
-      "/images/partners/unitech.png",
-      "/images/partners/rainbow.png",
+      { name: "SAARC", image: saarc },
+      { name: "SRIDATTA DMV", image: sridattaDmv },
+      { name: "UNITECH", image: unitech },
+      { name: "RAINBOW WORKS", image: rainbowWorks },
     ],
   },
 ];
@@ -51,15 +72,14 @@ function PartnersSection() {
       <div className="container">
         <div className="section-title">
           <h2>Our Expertise & Partnerships</h2>
-
           <p>
-            We collaborate with industry leaders to deliver cutting-edge
-            solutions and innovative technologies across software, electronics,
-            AI, and embedded systems.
+            We collaborate with industry leaders to deliver innovative
+            technology solutions across software, electronics, AI, embedded
+            systems, defence, and industrial automation.
           </p>
         </div>
 
-        <div className="partner-categories-grid">
+        <div className="cards-patnar">
           {partnerCategories.map((category, index) => (
             <div className="partner-category-card" key={index}>
               <div className="category-header">
@@ -67,14 +87,13 @@ function PartnersSection() {
                 <p>{category.subtitle}</p>
               </div>
 
-              <div className="partner-grid">
-                {category.partners.map((logo, i) => (
+              <div className="partner-row">
+                {category.partners.map((partner, i) => (
                   <div className="partner-card" key={i}>
-                    <img src={logo} alt="partner-logo" />
+                    <img src={partner.image} alt={partner.name} />
 
                     <div className="partner-overlay">
-                      <h4>{category.title}</h4>
-                      <p>{category.subtitle}</p>
+                      <h4>{partner.name}</h4>
                     </div>
                   </div>
                 ))}

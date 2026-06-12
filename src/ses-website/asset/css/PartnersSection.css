@@ -1,28 +1,27 @@
-/* ===================================
+/* ======================================
    PARTNERS SECTION
-=================================== */
+====================================== */
 
 .partners-section {
   padding: 100px 0;
-  background: #f8faff;
+  background: linear-gradient(135deg, #f8faff 0%, #eef3ff 50%, #ffffff 100%);
 }
 
-/* ===================================
+/* ======================================
    SECTION TITLE
-=================================== */
+====================================== */
 
 .section-title {
+  text-align: center;
   max-width: 850px;
   margin: 0 auto 70px;
-  text-align: center;
 }
 
 .section-title h2 {
   font-size: 42px;
   font-weight: 700;
   color: #4f63a6;
-  margin-bottom: 18px;
-  position: relative;
+  margin-bottom: 15px;
 }
 
 .section-title h2::after {
@@ -37,41 +36,47 @@
 
 .section-title p {
   color: #666;
-  font-size: 17px;
   line-height: 1.8;
+  font-size: 16px;
 }
 
-/* ===================================
+/* ======================================
    CATEGORY GRID
-=================================== */
+====================================== */
 
-.partner-categories-grid {
+.cards-patnar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 35px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
 }
 
-/* ===================================
+/* ======================================
    CATEGORY CARD
-=================================== */
+====================================== */
 
 .partner-category-card {
   background: #ffffff;
   border-radius: 24px;
   padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+  border: 1px solid rgba(79, 99, 166, 0.08);
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 
   transition: all 0.4s ease;
 }
 
 .partner-category-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 25px 45px rgba(79, 99, 166, 0.18);
+
+  box-shadow:
+    0 20px 45px rgba(79, 99, 166, 0.15),
+    0 8px 20px rgba(230, 125, 75, 0.08);
 }
 
-/* ===================================
-   CATEGORY HEADER
-=================================== */
+/* ======================================
+   HEADER
+====================================== */
 
 .category-header {
   text-align: center;
@@ -80,7 +85,7 @@
 
 .category-header h3 {
   color: #4f63a6;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
 }
@@ -91,172 +96,236 @@
   line-height: 1.6;
 }
 
-/* ===================================
-   PARTNER LOGO GRID
-=================================== */
+/* ======================================
+   PARTNER GRID
+====================================== */
 
-.partner-grid {
+.partner-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
 
-/* ===================================
-   LOGO CARD
-=================================== */
+/* ======================================
+   PARTNER CARD
+====================================== */
 
 .partner-card {
   position: relative;
 
-  background: #f8faff;
+  height: 130px;
 
-  border-radius: 16px;
+  background: #ffffff;
 
-  height: 120px;
+  border-radius: 18px;
 
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 
   overflow: hidden;
+
   cursor: pointer;
 
-  border: 1px solid #edf1ff;
+  border: 1px solid rgba(79, 99, 166, 0.08);
 
-  transition: all 0.4s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+
+  transition: all 0.5s ease;
 }
 
 .partner-card:hover {
-  transform: translateY(-5px);
+  background: #4f63a6;
+
+  transform: translateY(-8px) scale(1.04);
+
+  box-shadow:
+    0 20px 40px rgba(79, 99, 166, 0.25),
+    0 10px 20px rgba(230, 125, 75, 0.15);
 }
 
-/* ===================================
-   LOGO IMAGE
-=================================== */
+/* ======================================
+   LOGO
+====================================== */
 
 .partner-card img {
   width: 75%;
-  height: 65px;
+  height: 70px;
+
   object-fit: contain;
 
-  transition: all 0.4s ease;
+  position: relative;
+
+  z-index: 1;
+
+  transition: all 0.6s ease;
 }
 
 .partner-card:hover img {
-  transform: scale(1.12);
+  transform: scale(1.15);
+  opacity: 0.15;
 }
 
-/* ===================================
+/* ======================================
    OVERLAY
-=================================== */
+====================================== */
 
 .partner-overlay {
   position: absolute;
   inset: 0;
 
-  background: linear-gradient(
-    135deg,
-    rgba(79, 99, 166, 0.96),
-    rgba(230, 125, 75, 0.96)
-  );
-
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 
-  text-align: center;
-
-  padding: 15px;
+  z-index: 2;
 
   opacity: 0;
 
-  transition: all 0.4s ease;
+  transform: translateX(-100%);
+
+  transition: all 0.6s ease;
 }
 
 .partner-card:hover .partner-overlay {
   opacity: 1;
+  transform: translateX(0);
 }
+
+/* ======================================
+   TEXT
+====================================== */
 
 .partner-overlay h4 {
-  color: #fff;
-  font-size: 15px;
+  color: white;
+
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 5px;
+
+  text-align: center;
+
+  margin: 0;
+
+  letter-spacing: 0.5px;
+
+  opacity: 0;
+
+  transform: translateX(-30px);
+
+  transition: all 0.6s ease;
 }
 
-.partner-overlay p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
-  line-height: 1.4;
+.partner-card:hover .partner-overlay h4 {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-/* ===================================
-   ANIMATION
-=================================== */
+/* ======================================
+   UNDERLINE
+====================================== */
 
-.partner-category-card {
-  animation: fadeUp 0.7s ease;
+.partner-overlay h4::after {
+  content: "";
+
+  display: block;
+
+  width: 0;
+  height: 3px;
+
+  background: #e67d4b;
+
+  margin: 8px auto 0;
+
+  border-radius: 50px;
+
+  transition: width 0.4s ease;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.partner-card:hover .partner-overlay h4::after {
+  width: 80px;
 }
 
-/* ===================================
+/* ======================================
+   SHINE EFFECT
+====================================== */
+
+.partner-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: -100%;
+
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+
+  transition: all 0.8s ease;
+
+  z-index: 3;
+}
+
+.partner-card:hover::before {
+  left: 100%;
+}
+
+/* ======================================
    TABLET
-=================================== */
+====================================== */
 
 @media (max-width: 992px) {
-  .partner-categories-grid {
+  .cards-patnar {
+    grid-template-columns: 1fr;
+  }
+
+  .partner-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media (max-width: 768px) {
+  .partner-row {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .section-title h2 {
-    font-size: 36px;
-  }
-}
-
-/* ===================================
-   MOBILE
-=================================== */
-
-@media (max-width: 768px) {
-  .partner-categories-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .section-title h2 {
-    font-size: 30px;
+    font-size: 32px;
   }
 
   .partner-category-card {
     padding: 20px;
   }
-
-  .partner-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
-/* ===================================
+/* ======================================
    SMALL MOBILE
-=================================== */
+====================================== */
 
 @media (max-width: 480px) {
-  .partner-grid {
+  .partner-row {
     grid-template-columns: 1fr;
   }
 
   .partner-card {
-    height: 100px;
+    height: 110px;
+  }
+
+  .partner-card img {
+    height: 50px;
+  }
+
+  .partner-overlay h4 {
+    font-size: 14px;
   }
 }
