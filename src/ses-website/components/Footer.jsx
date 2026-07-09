@@ -94,17 +94,19 @@ function Footer() {
 
             <div className="contact-item">
               <FaMapMarkerAlt />
-              <span>Anantapur, Andhra Pradesh</span>
+              <span>
+                13-6/33, Ground floor, Road number 2, Gayathri hills, Badangpet
+              </span>
             </div>
 
             <div className="contact-item">
               <FaPhoneAlt />
-              <span>+91 XXXXX XXXXX</span>
+              <span>+91 8415796558</span>
             </div>
 
             <div className="contact-item">
               <FaEnvelope />
-              <span>info@ses.com</span>
+              <span>softelectronicsolutions@gmail.com</span>
             </div>
           </div>
         </div>

@@ -1,4 +1,7 @@
 require("dotenv").config();
+console.log("EMAIL_USER =", process.env.EMAIL_USER);
+console.log("EMAIL_PASS =", process.env.EMAIL_PASS);
+console.log("__dirname =", __dirname);
 
 /* ================= IMPORTS ================= */
 const express = require("express");
@@ -11,10 +14,9 @@ const mysql = require("mysql2");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const path = require("path");
-const archiver = require("archiver");
 
 const app = express();
-const PORT = process.env.PORT || 4005;
+const PORT = process.env.PORT || 4006;
 
 // Security middleware
 app.use(
@@ -47,10 +49,10 @@ const contactLimiter = rateLimit({
 // app.use(
 //   cors({
 //     origin: [
-//       "https://softelectronicsolutions.com",
-//       "https://www.softelectronicsolutions.com",
-//       "http://localhost:3000",
-//       "http://localhost:4005",
+//       // 'https://softelectronicsolutions.com',
+//       // 'https://www.softelectronicsolutions.com',
+//       // "http://localhost:3000",
+//       "http://localhost:4006",
 //     ],
 
 //     credentials: true,
@@ -62,11 +64,9 @@ const contactLimiter = rateLimit({
 app.use(
   cors({
     origin: [
-      // "https://softelectronicsolutions.com",
-      // "https://www.softelectronicsolutions.com",
       "http://localhost:3000",
-      "http://localhost:4005",
-      "http://localhost:4006", // ✅ ADD THIS
+      "http://127.0.0.1:3000",
+      "http://localhost:4006",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -77,13 +77,6 @@ app.use(
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-//navya
-app.get("/api/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "API Working",
-  });
-});
 
 // Serve static files from React build folder
 app.use(express.static(path.join(__dirname, "build")));
@@ -109,8 +102,8 @@ db.connect((err) => {
 
 const createTransporter = () => {
   try {
-    const user = "bodasunavya24@gmail.com";
-    const pass = "jnry oevt sttw drwn";
+    const user = process.env.EMAIL_USER;
+    const pass = process.env.EMAIL_PASS;
 
     console.log("Creating transporter with:", {
       user: user,
@@ -171,17 +164,15 @@ const validateFormData = (data) => {
 app.get("/api/test-email", async (req, res) => {
   try {
     console.log("\n=== EMAIL TEST ===");
-    console.log("GMAIL_USER:", process.env.GMAIL_USER);
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
     console.log(
-      "GMAIL_APP_PASSWORD length:",
-      process.env.GMAIL_APP_PASSWORD
-        ? process.env.GMAIL_APP_PASSWORD.length
-        : 0,
+      "EMAIL_PASS length:",
+      process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
     );
     console.log(
-      "GMAIL_APP_PASSWORD first 4 chars:",
-      process.env.GMAIL_APP_PASSWORD
-        ? process.env.GMAIL_APP_PASSWORD.substring(0, 4) + "..."
+      "EMAIL_PASS first 4 chars:",
+      process.env.EMAIL_PASS
+        ? process.env.EMAIL_PASS.substring(0, 4) + "..."
         : "NOT SET",
     );
 
@@ -195,7 +186,7 @@ app.get("/api/test-email", async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Email server is ready to send messages",
-      email: process.env.GMAIL_USER ? "Configured" : "Not configured",
+      email: process.env.EMAIL_USER ? "Configured" : "Not configured",
     });
   } catch (error) {
     console.error("❌ Email test failed:", error.message);
@@ -239,8 +230,10 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     // Email options for company
     const mailOptionsToCompany = {
-      from: `"Website Contact Form" <${process.env.GMAIL_USER || "bodasunavya24@gmail.com"}>`,
-      to: process.env.GMAIL_USER || "bodasunavya24@gmail.com",
+      // from: `"Website Contact Form" <${process.env.EMAIL_USER || "bodasunavya24@gmail.com"}>`,
+      // to: process.env.EMAIL_USER || "bodasunavya24@gmail.com",
+      from: `"Website Contact Form" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
       replyTo: email,
       subject: `New Contact Form Submission: ${name}`,
       html: `
@@ -272,7 +265,8 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     // Email options for user (confirmation)
     const mailOptionsToUser = {
-      from: `"Soft Electronic Solutions" <${process.env.GMAIL_USER || "bodasunavya24@gmail.com"}>`,
+      // from: `"Soft Electronic Solutions" <${process.env.EMAIL_USER || "bodasunavya24@gmail.com"}>`,
+      from: `"Soft Electronic Solutions" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Thank you for contacting Soft Electronic Solutions",
       html: `
@@ -293,7 +287,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
                         
                         <p><strong>Our Contact Information:</strong></p>
                         <ul style="color: #555;">
-                            <li>Email: bodasunavya24@gmail.com</li>
+                            <li>Email: ${process.env.EMAIL_USER}</li>
                             <li>Phone: +91 8415796558</li>
                             <li>Business Hours: Monday - Saturday, 10:00 AM - 7:00 PM</li>
                         </ul>
@@ -307,7 +301,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
                     </div>
                 </div>
             `,
-      text: `Thank you for contacting Soft Electronic Solutions!\n\nDear ${name},\n\nThank you for reaching out to Soft Electronic Solutions. We have received your message and one of our representatives will get back to you within 24-48 hours.\n\nYour Message:\n"${message.substring(0, 200)}${message.length > 200 ? "..." : ""}"\n\nOur Contact Information:\n- Email: bodasunavya24@gmail.com\n- Phone: +91 8415796558\n- Business Hours: Monday - Saturday, 10:00 AM - 7:00 PM\n\nBest regards,\nSoft Electronic Solutions Team\n\n© ${new Date().getFullYear()} Soft Electronic Solutions. All rights reserved.`,
+      text: `Thank you for contacting Soft Electronic Solutions!\n\nDear ${name},\n\nThank you for reaching out to Soft Electronic Solutions. We have received your message and one of our representatives will get back to you within 24-48 hours.\n\nYour Message:\n"${message.substring(0, 200)}${message.length > 200 ? "..." : ""}"\n\nOur Contact Information:\n- - Email: ${process.env.EMAIL_USER}\n- Phone: +91 8415796558\n- Business Hours: Monday - Saturday, 10:00 AM - 7:00 PM\n\nBest regards,\nSoft Electronic Solutions Team\n\n© ${new Date().getFullYear()} Soft Electronic Solutions. All rights reserved.`,
     };
 
     console.log("Sending emails...");
@@ -337,7 +331,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       errorMessage = "Network error. Please check your internet connection.";
     } else if (error.message.includes("Invalid login")) {
       errorMessage =
-        "Invalid email credentials. Please check GMAIL_USER and GMAIL_APP_PASSWORD in .env file.";
+        "Invalid email credentials. Please check EMAIL_USER and EMAIL_PASS in .env file.";
     }
 
     res.status(500).json({
@@ -476,6 +470,13 @@ app.get("/api/admin-email", (req, res) => {
     email: adminEmail,
   });
 });
+
+// app.get("/api/admin-email", (req, res) => {
+//   res.json({
+//     success: true,
+//     email: process.env.EMAIL_USER || "",
+//   });
+// });
 /* ================= VERIFY OTP ================= */
 app.post("/api/verify-otp", (req, res) => {
   const { email, otp } = req.body;
@@ -499,327 +500,9 @@ app.post("/api/verify-otp", (req, res) => {
 });
 
 /* ================= UPLOAD JOBS ================= */
-// app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
-//   const fs = require("fs");
-//   const xlsx = require("xlsx");
-
-//   /* ================= DELETE FILE FUNCTION ================= */
-
-//   const deleteFile = () => {
-//     try {
-//       if (req.file?.path && fs.existsSync(req.file.path)) {
-//         fs.unlinkSync(req.file.path);
-//       }
-//     } catch (e) {
-//       console.log("Delete error:", e);
-//     }
-//   };
-
-//   /* ================= NORMALIZE FUNCTION ================= */
-
-//   const normalize = (value) => {
-//     return String(value || "")
-//       .toLowerCase()
-//       .replace(/[^a-z0-9]/g, "")
-//       .trim();
-//   };
-
-//   try {
-//     /* ================= GET EMAIL ================= */
-
-//     const { email } = req.body;
-
-//     console.log("Received Email:", email);
-
-//     if (!email) {
-//       console.log("❌ Email missing");
-//       return res.status(400).json({
-//         success: false,
-//         message: "Email required",
-//       });
-//     }
-
-//     /* ================= CHECK OTP ================= */
-
-//     const key = normalizeEmail(email);
-//     const otpData = otpStore.get(key);
-
-//     console.log("OTP DATA:", otpData);
-
-//     if (!otpData?.verified) {
-//       console.log("❌ OTP not verified");
-//       deleteFile();
-
-//       return res.status(403).json({
-//         success: false,
-//         message: "OTP not verified",
-//       });
-//     }
-
-//     /* ================= CHECK FILE ================= */
-
-//     if (!req.file) {
-//       console.log("❌ File not received");
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Excel file required",
-//       });
-//     }
-
-//     /* ================= READ EXCEL ================= */
-
-//     const workbook = xlsx.readFile(req.file.path);
-
-//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-//     const data = xlsx.utils.sheet_to_json(sheet, {
-//       header: 1,
-//       defval: "",
-//     });
-
-//     if (!data.length) {
-//       deleteFile();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Excel file is empty",
-//       });
-//     }
-
-//     /* ================= FIND TARGET EMAIL ================= */
-
-//     let detectedTargetEmail = "";
-
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-//     for (let i = 0; i < data.length; i++) {
-//       const row = data[i];
-
-//       const rowText = row.map(normalize).join("");
-
-//       if (
-//         rowText.includes("targetmailid") ||
-//         rowText.includes("targetemail") ||
-//         rowText.includes("targetmail") ||
-//         rowText.includes("hremail") ||
-//         rowText.includes("contactemail")
-//       ) {
-//         for (let cell of row) {
-//           const value = String(cell || "").trim();
-
-//           if (emailRegex.test(value)) {
-//             detectedTargetEmail = value.toLowerCase();
-//             break;
-//           }
-//         }
-
-//         if (!detectedTargetEmail && data[i + 1]) {
-//           for (let cell of data[i + 1]) {
-//             const value = String(cell || "").trim();
-
-//             if (emailRegex.test(value)) {
-//               detectedTargetEmail = value.toLowerCase();
-//               break;
-//             }
-//           }
-//         }
-//       }
-
-//       if (!detectedTargetEmail) {
-//         for (let cell of row) {
-//           const value = String(cell || "").trim();
-
-//           if (emailRegex.test(value)) {
-//             detectedTargetEmail = value.toLowerCase();
-//             break;
-//           }
-//         }
-//       }
-
-//       if (detectedTargetEmail) break;
-//     }
-
-//     /* ================= VALIDATE TARGET EMAIL ================= */
-
-//     if (!detectedTargetEmail) {
-//       deleteFile();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Target Mail Id not found in Excel",
-//       });
-//     }
-
-//     console.log("Detected Target Email:", detectedTargetEmail);
-
-//     /* ================= FIND HEADER ROW ================= */
-
-//     let headerIndex = -1;
-
-//     for (let i = 0; i < data.length; i++) {
-//       const rowText = data[i].map(normalize).join("");
-
-//       if (
-//         rowText.includes("role") &&
-//         rowText.includes("location") &&
-//         rowText.includes("type") &&
-//         (rowText.includes("desc") ||
-//           rowText.includes("description") ||
-//           rowText.includes("details"))
-//       ) {
-//         headerIndex = i;
-//         break;
-//       }
-//     }
-
-//     if (headerIndex === -1) {
-//       deleteFile();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Job header row not found",
-//       });
-//     }
-
-//     /* ================= GET HEADERS ================= */
-
-//     const headers = data[headerIndex].map(normalize);
-
-//     /* ================= FIND COLUMN INDEX ================= */
-
-//     const findIndex = (keywords) => {
-//       return headers.findIndex((h) => keywords.some((k) => h.includes(k)));
-//     };
-
-//     const roleIndex = findIndex(["role"]);
-//     const locationIndex = findIndex(["location"]);
-//     const typeIndex = findIndex(["type"]);
-//     const descIndex = findIndex(["description", "details", "desc"]);
-
-//     if (roleIndex < 0 || locationIndex < 0 || typeIndex < 0 || descIndex < 0) {
-//       deleteFile();
-
-//       return res.status(400).json({
-//         success: false,
-//         message:
-//           "Missing required columns: Role / Location / Type / Description",
-//       });
-//     }
-
-//     /* ================= READ JOB ROWS ================= */
-
-//     const jobs = [];
-
-//     for (let i = headerIndex + 1; i < data.length; i++) {
-//       const row = data[i];
-
-//       const role = String(row[roleIndex] || "").trim();
-//       const location = String(row[locationIndex] || "").trim();
-//       const type = String(row[typeIndex] || "").trim();
-//       const description = String(row[descIndex] || "").trim();
-
-//       if (!role && !location && !type && !description) continue;
-
-//       jobs.push([role, location, type, description, detectedTargetEmail]);
-//     }
-
-//     if (jobs.length === 0) {
-//       deleteFile();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "No valid job rows found",
-//       });
-//     }
-
-//     /* ================= SAFE DATABASE TRANSACTION ================= */
-
-//     const sql =
-//       "INSERT INTO jobs (role, location, type, description, target_email) VALUES ?";
-
-//     db.beginTransaction((err) => {
-//       if (err) {
-//         deleteFile();
-
-//         return res.status(500).json({
-//           success: false,
-//           message: "Transaction start failed",
-//         });
-//       }
-
-//       /* DELETE OLD JOBS */
-
-//       db.query("DELETE FROM jobs", (deleteErr) => {
-//         if (deleteErr) {
-//           return db.rollback(() => {
-//             deleteFile();
-
-//             res.status(500).json({
-//               success: false,
-//               message: "Failed to clear old jobs",
-//             });
-//           });
-//         }
-
-//         /* INSERT NEW JOBS */
-
-//         db.query(sql, [jobs], (insertErr) => {
-//           if (insertErr) {
-//             return db.rollback(() => {
-//               deleteFile();
-
-//               res.status(500).json({
-//                 success: false,
-//                 message: "Database insert failed",
-//               });
-//             });
-//           }
-
-//           /* COMMIT */
-
-//           db.commit((commitErr) => {
-//             deleteFile();
-
-//             if (commitErr) {
-//               return db.rollback(() => {
-//                 res.status(500).json({
-//                   success: false,
-//                   message: "Commit failed",
-//                 });
-//               });
-//             }
-
-//             res.json({
-//               success: true,
-//               message: "Jobs uploaded successfully",
-//               count: jobs.length,
-//             });
-//           });
-//         });
-//       });
-//     });
-//   } catch (err) {
-//     console.log(err);
-
-//     deleteFile();
-
-//     res.status(500).json({
-//       success: false,
-//       message: "Upload failed",
-//     });
-//   }
-// });
-
 app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
   const fs = require("fs");
   const xlsx = require("xlsx");
-
-  console.log("\n==============================");
-  console.log("UPLOAD JOBS API HIT");
-  console.log("==============================");
-  console.log("BODY:", req.body);
-  console.log("FILE:", req.file);
 
   /* ================= DELETE FILE FUNCTION ================= */
 
@@ -847,11 +530,8 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
 
     const { email } = req.body;
 
-    console.log("Received Email:", email);
-
     if (!email) {
-      console.log("❌ Email missing");
-
+      deleteFile();
       return res.status(400).json({
         success: false,
         message: "Email required",
@@ -861,13 +541,10 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     /* ================= CHECK OTP ================= */
 
     const key = normalizeEmail(email);
+
     const otpData = otpStore.get(key);
 
-    console.log("OTP DATA:", otpData);
-
     if (!otpData?.verified) {
-      console.log("❌ OTP not verified");
-
       deleteFile();
 
       return res.status(403).json({
@@ -879,20 +556,11 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     /* ================= CHECK FILE ================= */
 
     if (!req.file) {
-      console.log("❌ File not received");
-
       return res.status(400).json({
         success: false,
         message: "Excel file required",
       });
     }
-
-    console.log("Uploaded File:", {
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      path: req.file.path,
-    });
 
     /* ================= READ EXCEL ================= */
 
@@ -904,10 +572,6 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       header: 1,
       defval: "",
     });
-
-    console.log("Rows Found:", data.length);
-    console.log("First 10 Rows:");
-    console.log(data.slice(0, 10));
 
     if (!data.length) {
       deleteFile();
@@ -971,8 +635,6 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       if (detectedTargetEmail) break;
     }
 
-    console.log("Detected Target Email:", detectedTargetEmail);
-
     /* ================= VALIDATE TARGET EMAIL ================= */
 
     if (!detectedTargetEmail) {
@@ -983,6 +645,8 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
         message: "Target Mail Id not found in Excel",
       });
     }
+
+    console.log("Detected Target Email:", detectedTargetEmail);
 
     /* ================= FIND HEADER ROW ================= */
 
@@ -1004,12 +668,6 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       }
     }
 
-    console.log("Header Index:", headerIndex);
-
-    if (headerIndex >= 0) {
-      console.log("Header Row:", data[headerIndex]);
-    }
-
     if (headerIndex === -1) {
       deleteFile();
 
@@ -1023,8 +681,6 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
 
     const headers = data[headerIndex].map(normalize);
 
-    console.log("Headers:", headers);
-
     /* ================= FIND COLUMN INDEX ================= */
 
     const findIndex = (keywords) => {
@@ -1035,11 +691,7 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     const locationIndex = findIndex(["location"]);
     const typeIndex = findIndex(["type"]);
     const descIndex = findIndex(["description", "details", "desc"]);
-
-    console.log("roleIndex:", roleIndex);
-    console.log("locationIndex:", locationIndex);
-    console.log("typeIndex:", typeIndex);
-    console.log("descIndex:", descIndex);
+    const vacancyIndex = findIndex(["vacancies", "vacancy"]);
 
     if (roleIndex < 0 || locationIndex < 0 || typeIndex < 0 || descIndex < 0) {
       deleteFile();
@@ -1062,16 +714,18 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       const location = String(row[locationIndex] || "").trim();
       const type = String(row[typeIndex] || "").trim();
       const description = String(row[descIndex] || "").trim();
+      const vacancies = Number(row[vacancyIndex]) || 1;
 
       if (!role && !location && !type && !description) continue;
 
-      jobs.push([role, location, type, description, detectedTargetEmail]);
-    }
-
-    console.log("Jobs Found:", jobs.length);
-
-    if (jobs.length > 0) {
-      console.log("First Job:", jobs[0]);
+      jobs.push([
+        role,
+        location,
+        type,
+        description,
+        detectedTargetEmail,
+        vacancies,
+      ]);
     }
 
     if (jobs.length === 0) {
@@ -1083,13 +737,18 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       });
     }
 
-    console.log("Total Jobs To Insert:", jobs.length);
-
     /* ================= SAFE DATABASE TRANSACTION ================= */
-
-    const sql =
-      "INSERT INTO jobs (role, location, type, description, target_email) VALUES ?";
-
+    const sql = `
+INSERT INTO jobs
+(
+role,
+location,
+type,
+description,
+target_email,
+total_vacancies
+)
+VALUES ?`;
     db.beginTransaction((err) => {
       if (err) {
         deleteFile();
@@ -1099,6 +758,8 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
           message: "Transaction start failed",
         });
       }
+
+      /* DELETE OLD JOBS */
 
       db.query("DELETE FROM jobs", (deleteErr) => {
         if (deleteErr) {
@@ -1112,10 +773,10 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
           });
         }
 
+        /* INSERT NEW JOBS */
+
         db.query(sql, [jobs], (insertErr) => {
           if (insertErr) {
-            console.log("DB INSERT ERROR:", insertErr);
-
             return db.rollback(() => {
               deleteFile();
 
@@ -1126,12 +787,12 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
             });
           }
 
+          /* COMMIT */
+
           db.commit((commitErr) => {
             deleteFile();
 
             if (commitErr) {
-              console.log("COMMIT ERROR:", commitErr);
-
               return db.rollback(() => {
                 res.status(500).json({
                   success: false,
@@ -1150,12 +811,7 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       });
     });
   } catch (err) {
-    console.log("❌ UPLOAD ERROR");
     console.log(err);
-
-    if (err.stack) {
-      console.log(err.stack);
-    }
 
     deleteFile();
 
@@ -1176,23 +832,24 @@ app.post("/api/apply", upload.single("resume"), (req, res) => {
       if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
     }
   };
 
+  // Validation
   if (!name || !email || !phone || !role) {
     deleteFile();
     return res.status(400).json({
       success: false,
-      message: "Missing fields",
+      message: "All fields are required.",
     });
   }
 
   if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: "Resume file required",
+      message: "Resume file is required.",
     });
   }
 
@@ -1200,64 +857,135 @@ app.post("/api/apply", upload.single("resume"), (req, res) => {
     deleteFile();
     return res.status(400).json({
       success: false,
-      message: "Only PDF resume allowed",
+      message: "Only PDF resumes are allowed.",
     });
   }
 
-  /* ================= ⭐ FIX START HERE ================= */
+  const applicantEmail = email.trim().toLowerCase();
 
-  const roles = role.split(",").map((r) => r.trim());
-
-  db.query(
-    `SELECT DISTINCT target_email FROM jobs WHERE role IN (?)`,
-    [roles],
-    (err, result) => {
-      if (err) {
-        deleteFile();
-        return res.status(500).json({
-          success: false,
-          message: "Database error",
-        });
-      }
-
-      if (!result.length) {
-        deleteFile();
-        return res.status(404).json({
-          success: false,
-          message: "Job not found",
-        });
-      }
-
-      const targetEmail = result[0].target_email;
-
-      res.json({
-        success: true,
-        message: "Application received",
+  // Get job
+  db.query("SELECT * FROM jobs WHERE role = ? LIMIT 1", [role], (err, jobs) => {
+    if (err) {
+      deleteFile();
+      return res.status(500).json({
+        success: false,
+        message: "Database error.",
       });
+    }
 
-      transporter.sendMail(
-        {
-          from: process.env.EMAIL_USER,
-          to: targetEmail,
-          subject: `New Application - ${role}`,
-          text:
-            `Name: ${name}\n` +
-            `Email: ${email}\n` +
-            `Phone: ${phone}\n` +
-            `Role: ${role}`,
-          attachments: [
-            {
-              filename: req.file.originalname,
-              path: filePath,
-            },
-          ],
-        },
-        () => {
+    if (!jobs.length) {
+      deleteFile();
+      return res.status(404).json({
+        success: false,
+        message: "Job not found.",
+      });
+    }
+
+    const job = jobs[0];
+
+    // Already applied?
+    db.query(
+      "SELECT id FROM applications WHERE job_id=? AND applicant_email=?",
+      [job.id, applicantEmail],
+      (err, existing) => {
+        if (err) {
           deleteFile();
-        },
-      );
-    },
-  );
+          return res.status(500).json({
+            success: false,
+            message: "Database error.",
+          });
+        }
+
+        if (existing.length > 0) {
+          deleteFile();
+          return res.status(400).json({
+            success: false,
+            message: "You have already applied for this job.",
+          });
+        }
+
+        // Count applications
+        db.query(
+          "SELECT COUNT(*) AS total FROM applications WHERE job_id=?",
+          [job.id],
+          (err, countResult) => {
+            if (err) {
+              deleteFile();
+              return res.status(500).json({
+                success: false,
+                message: "Database error.",
+              });
+            }
+
+            const totalApplications = countResult[0].total;
+
+            if (totalApplications >= 20) {
+              deleteFile();
+              return res.status(400).json({
+                success: false,
+                message: "Application limit reached. This job is closed.",
+              });
+            }
+
+            // Save application
+            db.query(
+              `INSERT INTO applications
+                (
+                  job_id,
+                  applicant_name,
+                  applicant_email,
+                  applicant_phone,
+                  resume_path
+                )
+                VALUES (?,?,?,?,?)`,
+              [job.id, name.trim(), applicantEmail, phone.trim(), filePath],
+              (err) => {
+                if (err) {
+                  deleteFile();
+                  return res.status(500).json({
+                    success: false,
+                    message: "Failed to save application.",
+                  });
+                }
+
+                // Send email to HR
+                transporter.sendMail(
+                  {
+                    from: process.env.EMAIL_USER,
+                    to: job.target_email,
+                    subject: `New Application - ${job.role}`,
+                    text:
+                      `Name: ${name}\n` +
+                      `Email: ${applicantEmail}\n` +
+                      `Phone: ${phone}\n` +
+                      `Role: ${job.role}`,
+                    attachments: [
+                      {
+                        filename: req.file.originalname,
+                        path: filePath,
+                      },
+                    ],
+                  },
+                  (mailErr) => {
+                    deleteFile();
+
+                    if (mailErr) {
+                      console.log("Mail Error:", mailErr);
+                    }
+                  },
+                );
+
+                res.json({
+                  success: true,
+                  message: "Application submitted successfully.",
+                });
+              },
+            );
+          },
+        );
+      },
+    );
+  });
 });
 /* ================= GET JOBS ================= */
 app.get("/api/jobs", (req, res) => {

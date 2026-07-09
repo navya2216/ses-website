@@ -42,7 +42,10 @@ function Contact() {
                 <FaMapMarkerAlt />
                 <div>
                   <h4>Address</h4>
-                  <p>3/13 Gayathri Hills Road Number 2</p>
+                  <p>
+                    13-6/33, Gayathri Hills Road Number
+                    2,Badangpet,Hyderbad-500058
+                  </p>
                 </div>
               </div>
 
