@@ -13,25 +13,18 @@ function JobCard({ job }) {
     <div className="job-card">
       <div className="job-card-top">
         <h3>{job.role}</h3>
-
         <span className="job-badge">{job.type}</span>
       </div>
 
       <div className="job-details">
-        <p>
-          📍 <strong>Location:</strong> {job.location}
-        </p>
-
-        <p>
-          💼 <strong>Type:</strong> {job.type}
-        </p>
+        <p>📍 {job.location}</p>
+        <p>💼 {job.type}</p>
+        <p>👥 Vacancies: {job.vacancies || job.total_vacancies || 0}</p>
       </div>
 
-      <p className="job-desc">{job.description}</p>
+      <p>{job.description}</p>
 
-      <button className="apply-btn" onClick={handleApply}>
-        Apply Now →
-      </button>
+      <button onClick={handleApply}>Apply Now →</button>
     </div>
   );
 }

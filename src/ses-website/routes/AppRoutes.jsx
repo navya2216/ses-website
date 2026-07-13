@@ -8,28 +8,60 @@ import About from "../pages/About";
 import Services from "../pages/Services";
 import Projects from "../pages/Projects";
 import Careers from "../pages/Careers";
-import AdminPage from "../pages/careers/AdminPage";
 import Contact from "../pages/Contact";
-// import Login from "../pages/Login";
+
+/* ================= Super Admin ================= */
+
+import SuperAdminLogin from "../pages/superadmin/SuperAdminLogin";
+import SuperAdminDashboard from "../pages/superadmin/SuperAdminDashboard";
+import CreateAdmin from "../pages/superadmin/CreateAdmin";
+import AdminList from "../pages/superadmin/AdminList";
+
+/* ================= Admin ================= */
+
+import AdminLogin from "../pages/admin/AdminLogin";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import UploadJobs from "../pages/admin/UploadJobs";
+import Applications from "../pages/admin/Applications";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Website Pages */}
+      {/* ================= Website ================= */}
 
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+
         <Route path="/about" element={<About />} />
+
         <Route path="/services" element={<Services />} />
+
         <Route path="/projects" element={<Projects />} />
+
         <Route path="/careers" element={<Careers />} />
-        <Route path="/careers/admin" element={<AdminPage />} />
+
         <Route path="/contact" element={<Contact />} />
       </Route>
 
-      {/* Login Page */}
+      {/* ================= Super Admin ================= */}
 
-      {/* <Route path="/login" element={<Login />} /> */}
+      <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
+      <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+
+      <Route path="/superadmin/create-admin" element={<CreateAdmin />} />
+
+      <Route path="/superadmin/admin-list" element={<AdminList />} />
+
+      {/* ================= Admin ================= */}
+
+      <Route path="/admin/login" element={<AdminLogin />} />
+
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+      <Route path="/admin/upload-jobs" element={<UploadJobs />} />
+
+      <Route path="/admin/applications" element={<Applications />} />
     </Routes>
   );
 }

@@ -1,7 +1,4 @@
 require("dotenv").config();
-console.log("EMAIL_USER =", process.env.EMAIL_USER);
-console.log("EMAIL_PASS =", process.env.EMAIL_PASS);
-console.log("__dirname =", __dirname);
 
 /* ================= IMPORTS ================= */
 const express = require("express");
@@ -11,369 +8,49 @@ const xlsx = require("xlsx");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const mysql = require("mysql2");
-const rateLimit = require("express-rate-limit");
-const helmet = require("helmet");
-const path = require("path");
+const bcrypt = require("bcrypt");
+const http = require("http");
+const WebSocket = require("ws");
 
 const app = express();
-const PORT = process.env.PORT || 4006;
-
-// Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true,
-    },
-    frameguard: {
-      action: "deny",
-    },
-    referrerPolicy: {
-      policy: "strict-origin-when-cross-origin",
-    },
-  }),
-);
-
-// Rate limiting for contact form
-const contactLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: "Too many contact requests from this IP, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// CORS configuration
-// app.use(
-//   cors({
-//     origin: [
-//       // 'https://softelectronicsolutions.com',
-//       // 'https://www.softelectronicsolutions.com',
-//       // "http://localhost:3000",
-//       "http://localhost:4006",
-//     ],
-
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-//   }),
-// );
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:4006",
-    ],
+    origin: ["http://localhost:4007"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   }),
 );
 
-// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from React build folder
-app.use(express.static(path.join(__dirname, "build")));
-
+app.use("/uploads", express.static("uploads"));
 /* ================= MYSQL ================= */
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "123456789",
-  database: process.env.DB_NAME || "career_portal",
+  host: "localhost",
+  user: "root",
+  password: "123456789",
+  database: "career_portal",
 });
 
 db.connect((err) => {
-  if (err) {
-    console.error("DB Error:", err);
-    console.error(
-      "Make sure MySQL is running and credentials are correct in .env",
-    );
-  } else {
-    console.log("✓ MySQL Connected");
-  }
+  if (err) console.log("DB Error:", err);
+  else console.log("MySQL Connected");
 });
 
-const createTransporter = () => {
-  try {
-    const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
+/* ================= CONFIG ================= */
+const PORT = process.env.PORT || 4006;
 
-    console.log("Creating transporter with:", {
-      user: user,
-      passLength: pass ? pass.length : 0,
-      passFirst4: pass ? pass.substring(0, 4) + "..." : "none",
-      passHasSpaces: pass ? pass.includes(" ") : false,
-    });
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: user,
-        pass: pass,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-      debug: true,
-      logger: true,
-    });
-
-    console.log("Transporter created successfully");
-    return transporter;
-  } catch (error) {
-    console.error("Error creating transporter:", error);
-    throw error;
-  }
-};
-
-// Validate email function
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-// Validate form data
-const validateFormData = (data) => {
-  const errors = [];
-
-  if (!data.name || data.name.trim().length < 2) {
-    errors.push("Name must be at least 2 characters long");
-  }
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push("Please provide a valid email address");
-  }
-
-  if (!data.message || data.message.trim().length < 10) {
-    errors.push("Message must be at least 10 characters long");
-  }
-
-  return errors;
-};
-
-// Test email connection endpoint
-app.get("/api/test-email", async (req, res) => {
-  try {
-    console.log("\n=== EMAIL TEST ===");
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log(
-      "EMAIL_PASS length:",
-      process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
-    );
-    console.log(
-      "EMAIL_PASS first 4 chars:",
-      process.env.EMAIL_PASS
-        ? process.env.EMAIL_PASS.substring(0, 4) + "..."
-        : "NOT SET",
-    );
-
-    const transporter = createTransporter();
-
-    // Verify connection configuration
-    console.log("Verifying transporter...");
-    await transporter.verify();
-
-    console.log(" Email verification successful");
-    res.status(200).json({
-      success: true,
-      message: "Email server is ready to send messages",
-      email: process.env.EMAIL_USER ? "Configured" : "Not configured",
-    });
-  } catch (error) {
-    console.error("❌ Email test failed:", error.message);
-    console.error("Error code:", error.code);
-    console.error("Error response:", error.response);
-    res.status(500).json({
-      success: false,
-      message: "Email configuration error",
-      error:
-        process.env.NODE_ENV === "development"
-          ? error.message
-          : "Check server configuration",
-      code: error.code,
-    });
-  }
-});
-// Contact form endpoint with rate limiting
-app.post("/api/contact", contactLimiter, async (req, res) => {
-  try {
-    console.log("Contact form submission received:", req.body);
-
-    const { name, email, company, phone, message } = req.body;
-
-    // Validate required fields
-    const validationErrors = validateFormData({ name, email, message });
-    if (validationErrors.length > 0) {
-      console.log("Validation errors:", validationErrors);
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: validationErrors,
-      });
-    }
-
-    // Create email transporter
-    const transporter = createTransporter();
-
-    // Test connection
-    await transporter.verify();
-    console.log("Email server connection verified");
-
-    // Email options for company
-    const mailOptionsToCompany = {
-      // from: `"Website Contact Form" <${process.env.EMAIL_USER || "bodasunavya24@gmail.com"}>`,
-      // to: process.env.EMAIL_USER || "bodasunavya24@gmail.com",
-      from: `"Website Contact Form" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      replyTo: email,
-      subject: `New Contact Form Submission: ${name}`,
-      html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #2C3E50;">New Contact Form Submission</h2>
-                    
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #FF6B35;">
-                        <h3 style="color: #2C3E50;">Contact Information:</h3>
-                        <p><strong>Name:</strong> ${name}</p>
-                        <p><strong>Email:</strong> ${email}</p>
-                        ${company ? `<p><strong>Company:</strong> ${company}</p>` : ""}
-                        ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ""}
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin-top: 20px; border-left: 4px solid #3498DB;">
-                        <h3 style="color: #2C3E50;">Message:</h3>
-                        <p style="white-space: pre-wrap;">${message}</p>
-                    </div>
-                    
-                    <div style="margin-top: 30px; padding: 15px; background: #e8f4fc; border-radius: 5px;">
-                        <p style="margin: 0; color: #2C3E50;">
-                            <strong>Submitted:</strong> ${new Date().toLocaleString()}
-                        </p>
-                    </div>
-                </div>
-            `,
-      text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\n${company ? `Company: ${company}\n` : ""}${phone ? `Phone: ${phone}\n` : ""}\nMessage:\n${message}\n\nSubmitted: ${new Date().toLocaleString()}`,
-    };
-
-    // Email options for user (confirmation)
-    const mailOptionsToUser = {
-      // from: `"Soft Electronic Solutions" <${process.env.EMAIL_USER || "bodasunavya24@gmail.com"}>`,
-      from: `"Soft Electronic Solutions" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Thank you for contacting Soft Electronic Solutions",
-      html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="text-align: center; padding: 20px 0;">
-                        <h1 style="color: #2C3E50;">Thank You!</h1>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
-                        <h2 style="color: #2C3E50;">Dear ${name},</h2>
-                        
-                        <p>Thank you for reaching out to Soft Electronic Solutions. We have received your message and one of our representatives will get back to you within 24-48 hours.</p>
-                        
-                        <div style="margin: 30px 0; padding: 20px; background: white; border-radius: 5px; border: 1px solid #ddd;">
-                            <p><strong>Your Message:</strong></p>
-                            <p style="color: #555; font-style: italic;">"${message.substring(0, 200)}${message.length > 200 ? "..." : ""}"</p>
-                        </div>
-                        
-                        <p><strong>Our Contact Information:</strong></p>
-                        <ul style="color: #555;">
-                            <li>Email: ${process.env.EMAIL_USER}</li>
-                            <li>Phone: +91 8415796558</li>
-                            <li>Business Hours: Monday - Saturday, 10:00 AM - 7:00 PM</li>
-                        </ul>
-                        
-                        <p>Best regards,<br>
-                        <strong>Soft Electronic Solutions Team</strong></p>
-                    </div>
-                    
-                    <div style="margin-top: 30px; padding: 20px; text-align: center; background: #2C3E50; color: white; border-radius: 5px;">
-                        <p style="margin: 0;">© ${new Date().getFullYear()} Soft Electronic Solutions. All rights reserved.</p>
-                    </div>
-                </div>
-            `,
-      text: `Thank you for contacting Soft Electronic Solutions!\n\nDear ${name},\n\nThank you for reaching out to Soft Electronic Solutions. We have received your message and one of our representatives will get back to you within 24-48 hours.\n\nYour Message:\n"${message.substring(0, 200)}${message.length > 200 ? "..." : ""}"\n\nOur Contact Information:\n- - Email: ${process.env.EMAIL_USER}\n- Phone: +91 8415796558\n- Business Hours: Monday - Saturday, 10:00 AM - 7:00 PM\n\nBest regards,\nSoft Electronic Solutions Team\n\n© ${new Date().getFullYear()} Soft Electronic Solutions. All rights reserved.`,
-    };
-
-    console.log("Sending emails...");
-
-    // Send email to company
-    const companyResult = await transporter.sendMail(mailOptionsToCompany);
-    console.log("Email sent to company:", companyResult.messageId);
-
-    // Send confirmation email to user
-    const userResult = await transporter.sendMail(mailOptionsToUser);
-    console.log("Confirmation email sent to user:", userResult.messageId);
-
-    res.status(200).json({
-      success: true,
-      message:
-        "Thank you for your message! We have sent you a confirmation email and will get back to you soon.",
-    });
-  } catch (error) {
-    console.error("Error sending email:", error);
-
-    let errorMessage = "Failed to send message. Please try again later.";
-
-    if (error.code === "EAUTH") {
-      errorMessage =
-        "Email authentication failed. Please check your Gmail App Password in the .env file.";
-    } else if (error.code === "ESOCKET") {
-      errorMessage = "Network error. Please check your internet connection.";
-    } else if (error.message.includes("Invalid login")) {
-      errorMessage =
-        "Invalid email credentials. Please check EMAIL_USER and EMAIL_PASS in .env file.";
-    }
-
-    res.status(500).json({
-      success: false,
-      message: errorMessage,
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
-  }
-});
-
-// ============================================================
-// CAREER PAGE API ROUTES
-// ============================================================
+/* ================= MEMORY ================= */
 const otpStore = new Map();
-let hrEmail = "";
+const loginUsers = new Map();
 
 /* ================= EMAIL ================= */
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-// Verify transporter on startup
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email transporter verification failed:", error.message);
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log(
-      "EMAIL_PASS length:",
-      process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
-    );
-  } else {
-    console.log("✅ Email transporter verified and ready");
-  }
 });
 
 /* ================= HELPERS ================= */
@@ -389,116 +66,455 @@ function normalizeEmail(email) {
 const upload = multer({ dest: "uploads/" });
 
 /* ================= SEND OTP ================= */
-app.post("/api/send-otp", async (req, res) => {
-  const { email } = req.body;
+// app.post("/api/send-otp", async (req, res) => {
+//   const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email required",
-    });
-  }
+//   const adminEmail = normalizeEmail(process.env.EMAIL_USER);
+//   const userEmail = normalizeEmail(email);
 
-  const userEmail = normalizeEmail(email);
+//   if (userEmail !== adminEmail) {
+//     return res.status(403).json({
+//       success: false,
+//       message: "Unauthorized email",
+//     });
+//   }
 
-  try {
-    const otp = generateOTP();
+//   try {
+//     const otp = generateOTP();
 
-    otpStore.set(userEmail, {
-      otp,
-      verified: false,
-      expiry: Date.now() + 5 * 60 * 1000,
-    });
+//     otpStore.set(userEmail, {
+//       otp,
+//       verified: false,
+//       expiry: Date.now() + 5 * 60 * 1000,
+//     });
 
-    console.log(`\n=== OTP GENERATED ===`);
-    console.log(`Email: ${email}`);
-    console.log(`OTP: ${otp}`);
-    console.log(
-      `Expiry: ${new Date(Date.now() + 5 * 60 * 1000).toLocaleTimeString()}`,
-    );
-    console.log(`=== USE THIS OTP FOR TESTING ===\n`);
+//     await transporter.sendMail({
+//       from: process.env.EMAIL_USER,
+//       to: userEmail,
+//       subject: "OTP Verification",
+//       text: `Your OTP is ${otp}`,
+//     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: userEmail,
-      subject: "OTP Verification - SES Career Portal",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2C3E50;">OTP Verification</h2>
-          <p>Your One-Time Password (OTP) for SES Career Portal is:</p>
-          <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; text-align: center;">
-            <h1 style="color: #FF6B35; letter-spacing: 5px;">${otp}</h1>
-          </div>
-          <p>This OTP is valid for 5 minutes.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-          <hr>
-          <p style="color: #999; font-size: 12px;">SES Career Portal - Soft Electronic Solutions</p>
-        </div>
-      `,
-      text: `Your OTP is: ${otp}\n\nThis OTP is valid for 5 minutes.`,
-    });
+//     res.json({
+//       success: true,
+//       message: "OTP sent",
+//     });
+//   } catch (err) {
+//     console.log(err);
 
-    console.log(`✅ OTP sent successfully to ${email}`);
-    res.json({
-      success: true,
-      message: "OTP sent",
-    });
-  } catch (err) {
-    console.error("❌ OTP send error:", err.message);
-    console.log(`\n⚠️  EMAIL SENDING FAILED`);
-    console.log(`Error Details: ${err.message}`);
-    console.log(`\nTo fix email sending:`);
-    console.log(
-      `1. Generate Gmail App Password at: https://myaccount.google.com/apppasswords`,
-    );
-    console.log(`2. Update EMAIL_PASS in .env file`);
-    console.log(`3. Restart server\n`);
-
-    res.status(500).json({
-      success: false,
-      message: "OTP failed",
-    });
-  }
-});
-/* ================= GET ADMIN EMAIL ================= */
-
-app.get("/api/admin-email", (req, res) => {
-  const adminEmail = process.env.EMAIL_USER;
-
-  res.json({
-    success: true,
-    email: adminEmail,
-  });
-});
+//     res.status(500).json({
+//       success: false,
+//       message: "OTP failed",
+//     });
+//   }
+// });
+// /* ================= GET ADMIN EMAIL ================= */
 
 // app.get("/api/admin-email", (req, res) => {
+//   const adminEmail = process.env.EMAIL_USER;
+
 //   res.json({
 //     success: true,
-//     email: process.env.EMAIL_USER || "",
+//     email: adminEmail,
 //   });
 // });
-/* ================= VERIFY OTP ================= */
-app.post("/api/verify-otp", (req, res) => {
+// /* ================= VERIFY OTP ================= */
+// app.post("/api/verify-otp", (req, res) => {
+//   const { email, otp } = req.body;
+
+//   const key = normalizeEmail(email);
+//   const data = otpStore.get(key);
+
+//   if (!data)
+//     return res.status(400).json({ success: false, message: "OTP not found" });
+
+//   if (Date.now() > data.expiry)
+//     return res.status(400).json({ success: false, message: "OTP expired" });
+
+//   if (data.otp !== otp)
+//     return res.status(401).json({ success: false, message: "Invalid OTP" });
+
+//   data.verified = true;
+//   loginUsers.set(key, {
+//     role: data.role,
+//     loginTime: Date.now(),
+//   });
+
+//   res.json({ success: true, message: "OTP verified" });
+// });
+
+app.post("/api/superadmin/send-otp", async (req, res) => {
+  const { email, password } = req.body;
+
+  const key = normalizeEmail(email);
+
+  db.query(
+    "SELECT * FROM super_admin WHERE LOWER(email)=?",
+    [key],
+    async (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database Error",
+        });
+      }
+
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Super Admin not found",
+        });
+      }
+
+      // Check Password
+      if (rows[0].password !== password) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid Password",
+        });
+      }
+
+      otpStore.delete(key);
+
+      const otp = generateOTP();
+
+      otpStore.set(key, {
+        otp,
+        role: "SUPER_ADMIN",
+        verified: false,
+        expiry: Date.now() + 5 * 60 * 1000,
+      });
+
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: rows[0].email,
+          subject: "Super Admin OTP",
+          text: `Your OTP is ${otp}`,
+        });
+
+        res.json({
+          success: true,
+          message: "OTP Sent",
+        });
+      } catch (e) {
+        console.log(e);
+
+        res.status(500).json({
+          success: false,
+          message: "Mail Failed",
+        });
+      }
+    },
+  );
+});
+app.post("/api/superadmin/verify-otp", (req, res) => {
   const { email, otp } = req.body;
 
   const key = normalizeEmail(email);
+
   const data = otpStore.get(key);
 
-  if (!data)
-    return res.status(400).json({ success: false, message: "OTP not found" });
+  if (!data) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP Not Found",
+    });
+  }
 
-  if (Date.now() > data.expiry)
-    return res.status(400).json({ success: false, message: "OTP expired" });
+  if (Date.now() > data.expiry) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP Expired",
+    });
+  }
 
-  if (data.otp !== otp)
-    return res.status(401).json({ success: false, message: "Invalid OTP" });
+  if (data.otp !== otp) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid OTP",
+    });
+  }
 
   data.verified = true;
-  hrEmail = key;
 
-  res.json({ success: true, message: "OTP verified" });
+  loginUsers.set(key, {
+    role: "SUPER_ADMIN",
+    loginTime: Date.now(),
+  });
+
+  console.log("SUPER ADMIN LOGIN SUCCESS");
+  console.log(loginUsers);
+
+  res.json({
+    success: true,
+    message: "Login Successful",
+  });
 });
 
+/* ================= CREATE ADMIN ================= */
+
+app.post("/api/createadmin", (req, res) => {
+  const { superAdminEmail, name, email, password } = req.body;
+
+  const superKey = normalizeEmail(superAdminEmail);
+
+  console.log("Create Admin Request Email:", superKey);
+
+  console.log("Current Login Users:", loginUsers);
+
+  // Check Super Admin Login
+  if (loginUsers.get(superKey)?.role !== "SUPER_ADMIN") {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized Super Admin",
+    });
+  }
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, Email and Password are required",
+    });
+  }
+
+  // Get Super Admin ID
+
+  db.query(
+    "SELECT id FROM super_admin WHERE LOWER(email)=?",
+    [superKey],
+
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error",
+        });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Super Admin not found",
+        });
+      }
+
+      const superAdminId = result[0].id;
+
+      // Insert Admin
+
+      db.query(
+        `
+        INSERT INTO admins
+        (
+          super_admin_id,
+          name,
+          email,
+          password
+        )
+        VALUES(?,?,?,?)
+        `,
+
+        [superAdminId, name, email.toLowerCase(), password],
+
+        (err) => {
+          if (err) {
+            console.log(err);
+
+            return res.status(500).json({
+              success: false,
+              message: "Admin email already exists",
+            });
+          }
+
+          // websocket notification
+
+          if (global.sendNotification) {
+            global.sendNotification({
+              type: "ADMIN_CREATED",
+
+              message: `New Admin ${name} created`,
+            });
+          }
+
+          res.json({
+            success: true,
+
+            message: "Admin Created Successfully",
+          });
+        },
+      );
+    },
+  );
+});
+
+/* ================= GET ALL ADMINS ================= */
+
+app.get("/api/admins", (req, res) => {
+  db.query(
+    `
+  SELECT 
+  id,
+  name,
+  email,
+  phone,
+  status,
+  created_at
+  FROM admins
+  `,
+
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error",
+        });
+      }
+
+      res.json({
+        success: true,
+        admins: result,
+      });
+    },
+  );
+});
+
+/* ================= DELETE ADMIN BY SUPER ADMIN ================= */
+
+app.delete("/api/admins/:id", (req, res) => {
+  const { id } = req.params;
+
+  const { superAdminEmail } = req.body;
+
+  const key = normalizeEmail(superAdminEmail);
+
+  if (loginUsers.get(key)?.role !== "SUPER_ADMIN") {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  db.query(
+    "DELETE FROM admins WHERE id=?",
+
+    [id],
+
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Delete failed",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      if (global.sendNotification) {
+        global.sendNotification({
+          type: "ADMIN_DELETED",
+
+          message: "Admin deleted",
+        });
+      }
+
+      res.json({
+        success: true,
+
+        message: "Admin Deleted Successfully",
+      });
+    },
+  );
+});
+
+/* ================= ADMIN LOGIN ================= */
+
+app.post("/api/admin/login", (req, res) => {
+  const { email, password } = req.body;
+
+  db.query(
+    `
+ SELECT *
+ FROM admins
+ WHERE LOWER(email)=LOWER(?)
+ AND status='Active'
+ `,
+
+    [email],
+
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error",
+        });
+      }
+
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      const admin = rows[0];
+
+      if (admin.password !== password) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid password",
+        });
+      }
+
+      loginUsers.set(
+        admin.email.toLowerCase(),
+
+        {
+          role: "ADMIN",
+
+          adminId: admin.id,
+
+          loginTime: Date.now(),
+        },
+      );
+
+      res.json({
+        success: true,
+
+        message: "Login Successful",
+
+        admin: {
+          id: admin.id,
+
+          name: admin.name,
+
+          email: admin.email,
+        },
+      });
+    },
+  );
+});
+
+/* ================= ADMIN LOGOUT ================= */
+
+app.post("/api/admin/logout", (req, res) => {
+  const { email } = req.body;
+
+  if (email) {
+    loginUsers.delete(email.toLowerCase());
+  }
+
+  res.json({
+    success: true,
+
+    message: "Logout Successful",
+  });
+});
 /* ================= UPLOAD JOBS ================= */
 app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
   const fs = require("fs");
@@ -691,7 +707,6 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     const locationIndex = findIndex(["location"]);
     const typeIndex = findIndex(["type"]);
     const descIndex = findIndex(["description", "details", "desc"]);
-    const vacancyIndex = findIndex(["vacancies", "vacancy"]);
 
     if (roleIndex < 0 || locationIndex < 0 || typeIndex < 0 || descIndex < 0) {
       deleteFile();
@@ -714,18 +729,10 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
       const location = String(row[locationIndex] || "").trim();
       const type = String(row[typeIndex] || "").trim();
       const description = String(row[descIndex] || "").trim();
-      const vacancies = Number(row[vacancyIndex]) || 1;
 
       if (!role && !location && !type && !description) continue;
 
-      jobs.push([
-        role,
-        location,
-        type,
-        description,
-        detectedTargetEmail,
-        vacancies,
-      ]);
+      jobs.push([role, location, type, description, detectedTargetEmail]);
     }
 
     if (jobs.length === 0) {
@@ -738,17 +745,10 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     }
 
     /* ================= SAFE DATABASE TRANSACTION ================= */
-    const sql = `
-INSERT INTO jobs
-(
-role,
-location,
-type,
-description,
-target_email,
-total_vacancies
-)
-VALUES ?`;
+
+    const sql =
+      "INSERT INTO jobs (role, location, type, description, target_email) VALUES ?";
+
     db.beginTransaction((err) => {
       if (err) {
         deleteFile();
@@ -832,24 +832,23 @@ app.post("/api/apply", upload.single("resume"), (req, res) => {
       if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  // Validation
   if (!name || !email || !phone || !role) {
     deleteFile();
     return res.status(400).json({
       success: false,
-      message: "All fields are required.",
+      message: "Missing fields",
     });
   }
 
   if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: "Resume file is required.",
+      message: "Resume file required",
     });
   }
 
@@ -857,135 +856,64 @@ app.post("/api/apply", upload.single("resume"), (req, res) => {
     deleteFile();
     return res.status(400).json({
       success: false,
-      message: "Only PDF resumes are allowed.",
+      message: "Only PDF resume allowed",
     });
   }
 
-  const applicantEmail = email.trim().toLowerCase();
+  /* ================= ⭐ FIX START HERE ================= */
 
-  // Get job
-  db.query("SELECT * FROM jobs WHERE role = ? LIMIT 1", [role], (err, jobs) => {
-    if (err) {
-      deleteFile();
-      return res.status(500).json({
-        success: false,
-        message: "Database error.",
+  const roles = role.split(",").map((r) => r.trim());
+
+  db.query(
+    `SELECT DISTINCT target_email FROM jobs WHERE role IN (?)`,
+    [roles],
+    (err, result) => {
+      if (err) {
+        deleteFile();
+        return res.status(500).json({
+          success: false,
+          message: "Database error",
+        });
+      }
+
+      if (!result.length) {
+        deleteFile();
+        return res.status(404).json({
+          success: false,
+          message: "Job not found",
+        });
+      }
+
+      const targetEmail = result[0].target_email;
+
+      res.json({
+        success: true,
+        message: "Application received",
       });
-    }
 
-    if (!jobs.length) {
-      deleteFile();
-      return res.status(404).json({
-        success: false,
-        message: "Job not found.",
-      });
-    }
-
-    const job = jobs[0];
-
-    // Already applied?
-    db.query(
-      "SELECT id FROM applications WHERE job_id=? AND applicant_email=?",
-      [job.id, applicantEmail],
-      (err, existing) => {
-        if (err) {
+      transporter.sendMail(
+        {
+          from: process.env.EMAIL_USER,
+          to: targetEmail,
+          subject: `New Application - ${role}`,
+          text:
+            `Name: ${name}\n` +
+            `Email: ${email}\n` +
+            `Phone: ${phone}\n` +
+            `Role: ${role}`,
+          attachments: [
+            {
+              filename: req.file.originalname,
+              path: filePath,
+            },
+          ],
+        },
+        () => {
           deleteFile();
-          return res.status(500).json({
-            success: false,
-            message: "Database error.",
-          });
-        }
-
-        if (existing.length > 0) {
-          deleteFile();
-          return res.status(400).json({
-            success: false,
-            message: "You have already applied for this job.",
-          });
-        }
-
-        // Count applications
-        db.query(
-          "SELECT COUNT(*) AS total FROM applications WHERE job_id=?",
-          [job.id],
-          (err, countResult) => {
-            if (err) {
-              deleteFile();
-              return res.status(500).json({
-                success: false,
-                message: "Database error.",
-              });
-            }
-
-            const totalApplications = countResult[0].total;
-
-            if (totalApplications >= 20) {
-              deleteFile();
-              return res.status(400).json({
-                success: false,
-                message: "Application limit reached. This job is closed.",
-              });
-            }
-
-            // Save application
-            db.query(
-              `INSERT INTO applications
-                (
-                  job_id,
-                  applicant_name,
-                  applicant_email,
-                  applicant_phone,
-                  resume_path
-                )
-                VALUES (?,?,?,?,?)`,
-              [job.id, name.trim(), applicantEmail, phone.trim(), filePath],
-              (err) => {
-                if (err) {
-                  deleteFile();
-                  return res.status(500).json({
-                    success: false,
-                    message: "Failed to save application.",
-                  });
-                }
-
-                // Send email to HR
-                transporter.sendMail(
-                  {
-                    from: process.env.EMAIL_USER,
-                    to: job.target_email,
-                    subject: `New Application - ${job.role}`,
-                    text:
-                      `Name: ${name}\n` +
-                      `Email: ${applicantEmail}\n` +
-                      `Phone: ${phone}\n` +
-                      `Role: ${job.role}`,
-                    attachments: [
-                      {
-                        filename: req.file.originalname,
-                        path: filePath,
-                      },
-                    ],
-                  },
-                  (mailErr) => {
-                    deleteFile();
-
-                    if (mailErr) {
-                      console.log("Mail Error:", mailErr);
-                    }
-                  },
-                );
-
-                res.json({
-                  success: true,
-                  message: "Application submitted successfully.",
-                });
-              },
-            );
-          },
-        );
-      },
-    );
-  });
+        },
+      );
+    },
+  );
 });
 /* ================= GET JOBS ================= */
 app.get("/api/jobs", (req, res) => {
@@ -1008,30 +936,47 @@ app.get("/api/roles", (req, res) => {
   });
 });
 
-/* ================= START ================= */
-// Serve React app for all non-API routes (MUST be last, before listen)
-// Serve React app for all non-API routes (MUST be last, before listen)
-app.use((req, res, next) => {
-  if (!req.path.startsWith("/api")) {
-    const indexPath = path.join(__dirname, "build", "index.html");
-    console.log(`Serving React app for: ${req.path} from ${indexPath}`);
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        console.error("Error serving index.html:", err);
-        res.status(404).send("Build folder not found. Run: npm run build");
-      }
-    });
-  } else {
-    next();
-  }
+/* ================= WEBSOCKET ================= */
+
+const server = http.createServer(app);
+
+const wss = new WebSocket.Server({
+  server,
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  const domain = process.env.CLOUDFLARE_DOMAIN || "localhost";
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  console.log(`\n✅ Server running on ${protocol}://${domain}`);
-  console.log(
-    `📍 API Base URL: ${process.env.REACT_APP_API_URL || `http://localhost:${PORT}`}`,
-  );
-  console.log(`🔒 Environment: ${process.env.NODE_ENV || "development"}\n`);
+const clients = new Set();
+
+wss.on("connection", (ws) => {
+  console.log("WebSocket Connected");
+
+  clients.add(ws);
+
+  ws.on("message", (message) => {
+    console.log("Client Message:", message.toString());
+  });
+
+  ws.on("close", () => {
+    console.log("WebSocket Disconnected");
+
+    clients.delete(ws);
+  });
+});
+
+function sendNotification(data) {
+  clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+// Export function available for APIs
+global.sendNotification = sendNotification;
+
+/* ================= START ================= */
+
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+
+  console.log(`WebSocket running on ws://localhost:${PORT}`);
 });

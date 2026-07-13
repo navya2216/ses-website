@@ -1,34 +1,69 @@
 /* ==========================
-   APPLY FORM
+   APPLY FORM CONTAINER
 ========================== */
+
+* {
+  box-sizing: border-box;
+}
 
 .apply-form {
   max-width: 750px;
-  margin: auto;
+  width: 100%;
+  margin: 30px auto;
+  background: #ffffff;
 
-  background: #fff;
-
-  padding: 20px;
+  padding: 35px;
 
   border-radius: 24px;
 
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-  border: 11px solid rebeccapurple;
+
+  border: 4px solid rebeccapurple;
 }
 
+/* ==========================
+   TITLE
+========================== */
+
+.apply-form h2 {
+  color: #4f63a6;
+  font-weight: 700;
+}
+
+/* ==========================
+   INPUT GROUP
+========================== */
+
 .input-group {
-  margin-bottom: 18px;
+  display: block;
+  margin-bottom: 22px;
+}
+
+.input-group label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-weight: 600;
+
+  color: #344054;
 }
 
 .input-group input,
 .input-group select {
   width: 100%;
 
-  padding: 15px;
+  height: 52px;
+
+  padding: 0 15px;
 
   border: 1px solid #d0d5dd;
 
   border-radius: 12px;
+
+  font-size: 15px;
+
+  background: #fff;
 
   transition: 0.3s;
 }
@@ -43,6 +78,151 @@
 }
 
 /* ==========================
+   ERROR TEXT
+========================== */
+
+.text-danger {
+  display: block;
+
+  margin-top: 7px;
+
+  font-size: 13px;
+}
+/* ==========================
+   salary row
+========================== */
+
+.salary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 768px) {
+  .salary-row {
+    grid-template-columns: 1fr;
+  }
+}
+/* ==========================
+   SELECTED ROLES
+========================== */
+/* ==========================
+   ROLE SELECT BOX
+========================== */
+
+.role-select-box {
+  width: 100%;
+  min-height: 55px;
+  padding: 8px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.role-select-box:focus-within {
+  border-color: #4f63a6;
+  box-shadow: 0 0 0 4px rgba(79, 99, 166, 0.12);
+}
+
+/* ==========================
+   CHIP CONTAINER
+========================== */
+
+.role-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================
+   ROLE CHIP
+========================== */
+
+.role-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: linear-gradient(135deg, #4f63a6, #667eea);
+  color: #fff;
+
+  padding: 8px 14px;
+
+  border-radius: 25px;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+/* ==========================
+   REMOVE ICON
+========================== */
+
+.remove-role {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+
+  transition: transform 0.2s ease;
+}
+
+.remove-role:hover {
+  transform: scale(1.2);
+}
+
+/* ==========================
+   DROPDOWN
+========================== */
+
+.role-dropdown {
+  flex: 1;
+  min-width: 180px;
+
+  border: none !important;
+  outline: none !important;
+
+  background: transparent;
+
+  height: 38px;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  color: #555;
+}
+
+.role-dropdown:focus {
+  box-shadow: none !important;
+}
+
+/* Remove default select border */
+
+.role-dropdown option {
+  color: #000;
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media (max-width: 768px) {
+  .role-dropdown {
+    min-width: 100%;
+  }
+
+  .role-chip {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+}
+/* ==========================
    FILE UPLOAD
 ========================== */
 
@@ -51,9 +231,9 @@
 
   border-radius: 14px;
 
-  padding: 20px;
+  padding: 25px;
 
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 
   background: #f8faff;
 }
@@ -61,11 +241,15 @@
 .upload-box label {
   display: block;
 
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 
   font-weight: 600;
 
   color: #4f63a6;
+}
+
+.upload-box input {
+  width: 100%;
 }
 
 /* ==========================
@@ -75,9 +259,11 @@
 .submit-btn {
   width: 100%;
 
+  height: 55px;
+
   border: none;
 
-  padding: 16px;
+  padding: 15px;
 
   border-radius: 14px;
 
@@ -86,6 +272,7 @@
   color: white;
 
   font-size: 16px;
+
   font-weight: 600;
 
   cursor: pointer;
@@ -101,12 +288,18 @@
   box-shadow: 0 15px 30px rgba(230, 125, 75, 0.25);
 }
 
+.submit-btn:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
+}
+
 /* ==========================
-   SUCCESS
+   SUCCESS MESSAGE
 ========================== */
 
 .success-message {
-  margin-top: 20px;
+  margin-bottom: 20px;
 
   background: #e8fff1;
 
@@ -122,11 +315,11 @@
 }
 
 /* ==========================
-   ERROR
+   ERROR MESSAGE
 ========================== */
 
 .error-message {
-  margin-top: 20px;
+  margin-bottom: 20px;
 
   background: #fff1f2;
 
@@ -139,4 +332,18 @@
   text-align: center;
 
   font-weight: 600;
+}
+
+/* ==========================
+   MOBILE RESPONSIVE
+========================== */
+
+@media (max-width: 768px) {
+  .apply-form {
+    margin: 15px;
+
+    padding: 20px;
+
+    border-radius: 18px;
+  }
 }
