@@ -23,6 +23,7 @@ import AdminLogin from "../pages/admin/AdminLogin";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import UploadJobs from "../pages/admin/UploadJobs";
 import Applications from "../pages/admin/Applications";
+import DownloadTemplate from "../pages/admin/DownloadTemplate";
 
 function AppRoutes() {
   return (
@@ -52,6 +53,13 @@ function AppRoutes() {
       <Route path="/superadmin/create-admin" element={<CreateAdmin />} />
 
       <Route path="/superadmin/admin-list" element={<AdminList />} />
+      <Route
+        path="/superadmin/download-template"
+        element={<DownloadTemplate />}
+      />
+      <Route path="/superadmin/upload-jobs" element={<UploadJobs />} />
+
+      <Route path="/superadmin/applications" element={<Applications />} />
 
       {/* ================= Admin ================= */}
 
@@ -59,6 +67,7 @@ function AppRoutes() {
 
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
+      <Route path="/admin/download-template" element={<DownloadTemplate />} />
       <Route path="/admin/upload-jobs" element={<UploadJobs />} />
 
       <Route path="/admin/applications" element={<Applications />} />

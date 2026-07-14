@@ -24,17 +24,23 @@ app.use(
 app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
-/* ================= MYSQL ================= */
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "123456789",
   database: "career_portal",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-db.connect((err) => {
-  if (err) console.log("DB Error:", err);
-  else console.log("MySQL Connected");
+db.getConnection((err, connection) => {
+  if (err) {
+    console.log("DB Error:", err);
+  } else {
+    console.log("MySQL Connected");
+    connection.release();
+  }
 });
 
 /* ================= CONFIG ================= */
@@ -64,84 +70,6 @@ function normalizeEmail(email) {
 
 /* ================= MULTER ================= */
 const upload = multer({ dest: "uploads/" });
-
-/* ================= SEND OTP ================= */
-// app.post("/api/send-otp", async (req, res) => {
-//   const { email } = req.body;
-
-//   const adminEmail = normalizeEmail(process.env.EMAIL_USER);
-//   const userEmail = normalizeEmail(email);
-
-//   if (userEmail !== adminEmail) {
-//     return res.status(403).json({
-//       success: false,
-//       message: "Unauthorized email",
-//     });
-//   }
-
-//   try {
-//     const otp = generateOTP();
-
-//     otpStore.set(userEmail, {
-//       otp,
-//       verified: false,
-//       expiry: Date.now() + 5 * 60 * 1000,
-//     });
-
-//     await transporter.sendMail({
-//       from: process.env.EMAIL_USER,
-//       to: userEmail,
-//       subject: "OTP Verification",
-//       text: `Your OTP is ${otp}`,
-//     });
-
-//     res.json({
-//       success: true,
-//       message: "OTP sent",
-//     });
-//   } catch (err) {
-//     console.log(err);
-
-//     res.status(500).json({
-//       success: false,
-//       message: "OTP failed",
-//     });
-//   }
-// });
-// /* ================= GET ADMIN EMAIL ================= */
-
-// app.get("/api/admin-email", (req, res) => {
-//   const adminEmail = process.env.EMAIL_USER;
-
-//   res.json({
-//     success: true,
-//     email: adminEmail,
-//   });
-// });
-// /* ================= VERIFY OTP ================= */
-// app.post("/api/verify-otp", (req, res) => {
-//   const { email, otp } = req.body;
-
-//   const key = normalizeEmail(email);
-//   const data = otpStore.get(key);
-
-//   if (!data)
-//     return res.status(400).json({ success: false, message: "OTP not found" });
-
-//   if (Date.now() > data.expiry)
-//     return res.status(400).json({ success: false, message: "OTP expired" });
-
-//   if (data.otp !== otp)
-//     return res.status(401).json({ success: false, message: "Invalid OTP" });
-
-//   data.verified = true;
-//   loginUsers.set(key, {
-//     role: data.role,
-//     loginTime: Date.now(),
-//   });
-
-//   res.json({ success: true, message: "OTP verified" });
-// });
 
 app.post("/api/superadmin/send-otp", async (req, res) => {
   const { email, password } = req.body;
@@ -353,16 +281,17 @@ app.post("/api/createadmin", (req, res) => {
 app.get("/api/admins", (req, res) => {
   db.query(
     `
-  SELECT 
-  id,
-  name,
-  email,
-  phone,
-  status,
-  created_at
-  FROM admins
-  `,
-
+    SELECT
+      id,
+      name,
+      email,
+      password,
+      phone,
+      status,
+      created_at
+    FROM admins
+    ORDER BY id DESC
+    `,
     (err, result) => {
       if (err) {
         return res.status(500).json({
@@ -379,86 +308,25 @@ app.get("/api/admins", (req, res) => {
   );
 });
 
-/* ================= DELETE ADMIN BY SUPER ADMIN ================= */
-
-app.delete("/api/admins/:id", (req, res) => {
-  const { id } = req.params;
-
-  const { superAdminEmail } = req.body;
-
-  const key = normalizeEmail(superAdminEmail);
-
-  if (loginUsers.get(key)?.role !== "SUPER_ADMIN") {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
-
-  db.query(
-    "DELETE FROM admins WHERE id=?",
-
-    [id],
-
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Delete failed",
-        });
-      }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "Admin not found",
-        });
-      }
-
-      if (global.sendNotification) {
-        global.sendNotification({
-          type: "ADMIN_DELETED",
-
-          message: "Admin deleted",
-        });
-      }
-
-      res.json({
-        success: true,
-
-        message: "Admin Deleted Successfully",
-      });
-    },
-  );
-});
-
 /* ================= ADMIN LOGIN ================= */
-
 app.post("/api/admin/login", (req, res) => {
   const { email, password } = req.body;
 
   db.query(
-    `
- SELECT *
- FROM admins
- WHERE LOWER(email)=LOWER(?)
- AND status='Active'
- `,
-
+    "SELECT * FROM admins WHERE LOWER(email)=LOWER(?) AND status='Active'",
     [email],
-
     (err, rows) => {
       if (err) {
         return res.status(500).json({
           success: false,
-          message: "Database error",
+          message: "Database Error",
         });
       }
 
       if (rows.length === 0) {
         return res.status(404).json({
           success: false,
-          message: "Admin not found",
+          message: "Admin Not Found",
         });
       }
 
@@ -467,37 +335,76 @@ app.post("/api/admin/login", (req, res) => {
       if (admin.password !== password) {
         return res.status(401).json({
           success: false,
-          message: "Invalid password",
+          message: "Invalid Password",
         });
       }
 
-      loginUsers.set(
-        admin.email.toLowerCase(),
-
-        {
-          role: "ADMIN",
-
-          adminId: admin.id,
-
-          loginTime: Date.now(),
-        },
-      );
+      loginUsers.set(admin.email.toLowerCase(), {
+        role: "ADMIN",
+        adminId: admin.id,
+        loginTime: Date.now(),
+      });
 
       res.json({
         success: true,
-
         message: "Login Successful",
-
         admin: {
           id: admin.id,
-
           name: admin.name,
-
           email: admin.email,
         },
       });
     },
   );
+});
+
+app.put("/api/admins/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, phone } = req.body;
+
+  db.query(
+    `UPDATE admins
+     SET
+       name=?,
+       email=?,
+       password=?,
+       phone=?
+     WHERE id=?`,
+    [name, email, password, phone, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          success: false,
+          message: "Update failed",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Admin updated successfully",
+      });
+    },
+  );
+});
+/* ================= DELETE ADMIN BY SUPER ADMIN ================= */
+
+app.delete("/api/admins/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.query("DELETE FROM admins WHERE id=?", [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Delete failed",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Admin deleted successfully",
+    });
+  });
 });
 
 /* ================= ADMIN LOGOUT ================= */
@@ -516,168 +423,74 @@ app.post("/api/admin/logout", (req, res) => {
   });
 });
 /* ================= UPLOAD JOBS ================= */
+
+// ================= FILE UPLOAD =================
+
+// ================= UPLOAD JOB EXCEL API =================
+
 app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
-  const fs = require("fs");
-  const xlsx = require("xlsx");
-
-  /* ================= DELETE FILE FUNCTION ================= */
-
-  const deleteFile = () => {
-    try {
-      if (req.file?.path && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    } catch (e) {
-      console.log("Delete error:", e);
-    }
-  };
-
-  /* ================= NORMALIZE FUNCTION ================= */
-
-  const normalize = (value) => {
-    return String(value || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "")
-      .trim();
-  };
-
   try {
-    /* ================= GET EMAIL ================= */
-
-    const { email } = req.body;
-
-    if (!email) {
-      deleteFile();
-      return res.status(400).json({
-        success: false,
-        message: "Email required",
-      });
-    }
-
-    /* ================= CHECK OTP ================= */
-
-    const key = normalizeEmail(email);
-
-    const otpData = otpStore.get(key);
-
-    if (!otpData?.verified) {
-      deleteFile();
-
-      return res.status(403).json({
-        success: false,
-        message: "OTP not verified",
-      });
-    }
-
-    /* ================= CHECK FILE ================= */
-
     if (!req.file) {
       return res.status(400).json({
         success: false,
         message: "Excel file required",
       });
     }
-
-    /* ================= READ EXCEL ================= */
-
     const workbook = xlsx.readFile(req.file.path);
 
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const sheetName = workbook.SheetNames[0];
 
-    const data = xlsx.utils.sheet_to_json(sheet, {
+    const sheet = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
       header: 1,
-      defval: "",
     });
 
-    if (!data.length) {
-      deleteFile();
+    /*
+==============================
+GET TARGET EMAIL
+==============================
+*/
 
+    let targetEmails = [];
+
+    for (let i = 0; i < 5; i++) {
+      let row = sheet[i];
+
+      if (row) {
+        row.forEach((cell) => {
+          if (typeof cell === "string" && cell.includes("@")) {
+            targetEmails.push(cell.trim());
+          }
+        });
+      }
+    }
+
+    if (targetEmails.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Excel file is empty",
+
+        message: "Target Email missing in Excel",
       });
     }
 
-    /* ================= FIND TARGET EMAIL ================= */
+    /*
+==============================
+FIND HEADER ROW
+==============================
+*/
 
-    let detectedTargetEmail = "";
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-
-      const rowText = row.map(normalize).join("");
-
-      if (
-        rowText.includes("targetmailid") ||
-        rowText.includes("targetemail") ||
-        rowText.includes("targetmail") ||
-        rowText.includes("hremail") ||
-        rowText.includes("contactemail")
-      ) {
-        for (let cell of row) {
-          const value = String(cell || "").trim();
-
-          if (emailRegex.test(value)) {
-            detectedTargetEmail = value.toLowerCase();
-            break;
-          }
-        }
-
-        if (!detectedTargetEmail && data[i + 1]) {
-          for (let cell of data[i + 1]) {
-            const value = String(cell || "").trim();
-
-            if (emailRegex.test(value)) {
-              detectedTargetEmail = value.toLowerCase();
-              break;
-            }
-          }
-        }
-      }
-
-      if (!detectedTargetEmail) {
-        for (let cell of row) {
-          const value = String(cell || "").trim();
-
-          if (emailRegex.test(value)) {
-            detectedTargetEmail = value.toLowerCase();
-            break;
-          }
-        }
-      }
-
-      if (detectedTargetEmail) break;
-    }
-
-    /* ================= VALIDATE TARGET EMAIL ================= */
-
-    if (!detectedTargetEmail) {
-      deleteFile();
-
-      return res.status(400).json({
-        success: false,
-        message: "Target Mail Id not found in Excel",
-      });
-    }
-
-    console.log("Detected Target Email:", detectedTargetEmail);
-
-    /* ================= FIND HEADER ROW ================= */
+    /*
+==============================
+FIND HEADER ROW
+==============================
+*/
 
     let headerIndex = -1;
 
-    for (let i = 0; i < data.length; i++) {
-      const rowText = data[i].map(normalize).join("");
+    for (let i = 0; i < sheet.length; i++) {
+      let row = sheet[i];
 
       if (
-        rowText.includes("role") &&
-        rowText.includes("location") &&
-        rowText.includes("type") &&
-        (rowText.includes("desc") ||
-          rowText.includes("description") ||
-          rowText.includes("details"))
+        row.some((cell) => String(cell).trim().toLowerCase() === "job role")
       ) {
         headerIndex = i;
         break;
@@ -685,257 +498,518 @@ app.post("/api/upload-jobs", upload.single("file"), async (req, res) => {
     }
 
     if (headerIndex === -1) {
-      deleteFile();
-
       return res.status(400).json({
         success: false,
-        message: "Job header row not found",
+
+        message: "Job columns header not found",
       });
     }
 
-    /* ================= GET HEADERS ================= */
+    const headers = sheet[headerIndex];
 
-    const headers = data[headerIndex].map(normalize);
+    const requiredFields = [
+      "S.No",
+      "Job Role",
+      "Location",
+      "Job Type",
+      "Description",
+      "Number of Vacancies",
+    ];
 
-    /* ================= FIND COLUMN INDEX ================= */
+    let missingHeaders = [];
 
-    const findIndex = (keywords) => {
-      return headers.findIndex((h) => keywords.some((k) => h.includes(k)));
-    };
+    requiredFields.forEach((field) => {
+      if (!headers.includes(field)) {
+        missingHeaders.push(field);
+      }
+    });
 
-    const roleIndex = findIndex(["role"]);
-    const locationIndex = findIndex(["location"]);
-    const typeIndex = findIndex(["type"]);
-    const descIndex = findIndex(["description", "details", "desc"]);
-
-    if (roleIndex < 0 || locationIndex < 0 || typeIndex < 0 || descIndex < 0) {
-      deleteFile();
-
+    if (missingHeaders.length > 0) {
       return res.status(400).json({
         success: false,
-        message:
-          "Missing required columns: Role / Location / Type / Description",
+
+        message: "Missing Excel columns",
+        missingFields: missingHeaders,
       });
     }
 
-    /* ================= READ JOB ROWS ================= */
+    /*
+==============================
+READ JOB DATA
+==============================
+*/
 
-    const jobs = [];
+    let jobs = [];
 
-    for (let i = headerIndex + 1; i < data.length; i++) {
-      const row = data[i];
+    for (let i = headerIndex + 1; i < sheet.length; i++) {
+      let row = sheet[i];
 
-      const role = String(row[roleIndex] || "").trim();
-      const location = String(row[locationIndex] || "").trim();
-      const type = String(row[typeIndex] || "").trim();
-      const description = String(row[descIndex] || "").trim();
+      if (!row[1]) continue;
 
-      if (!role && !location && !type && !description) continue;
+      let job = {
+        job_role: row[1],
+        location: row[2],
+        job_type: row[3],
+        description: row[4],
+        vacancies: row[5] || 0,
+      };
 
-      jobs.push([role, location, type, description, detectedTargetEmail]);
-    }
+      let missing = [];
 
-    if (jobs.length === 0) {
-      deleteFile();
-
-      return res.status(400).json({
-        success: false,
-        message: "No valid job rows found",
+      Object.entries(job).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === "") {
+          missing.push(key);
+        }
       });
-    }
 
-    /* ================= SAFE DATABASE TRANSACTION ================= */
-
-    const sql =
-      "INSERT INTO jobs (role, location, type, description, target_email) VALUES ?";
-
-    db.beginTransaction((err) => {
-      if (err) {
-        deleteFile();
-
-        return res.status(500).json({
+      if (missing.length) {
+        return res.status(400).json({
           success: false,
-          message: "Transaction start failed",
+
+          message: `Row ${i + 1} missing fields`,
+
+          missingFields: missing,
         });
       }
 
-      /* DELETE OLD JOBS */
+      jobs.push(job);
+    }
 
-      db.query("DELETE FROM jobs", (deleteErr) => {
-        if (deleteErr) {
-          return db.rollback(() => {
-            deleteFile();
+    if (jobs.length === 0) {
+      return res.status(400).json({
+        success: false,
 
-            res.status(500).json({
-              success: false,
-              message: "Failed to clear old jobs",
-            });
-          });
-        }
-
-        /* INSERT NEW JOBS */
-
-        db.query(sql, [jobs], (insertErr) => {
-          if (insertErr) {
-            return db.rollback(() => {
-              deleteFile();
-
-              res.status(500).json({
-                success: false,
-                message: "Database insert failed",
-              });
-            });
-          }
-
-          /* COMMIT */
-
-          db.commit((commitErr) => {
-            deleteFile();
-
-            if (commitErr) {
-              return db.rollback(() => {
-                res.status(500).json({
-                  success: false,
-                  message: "Commit failed",
-                });
-              });
-            }
-
-            res.json({
-              success: true,
-              message: "Jobs uploaded successfully",
-              count: jobs.length,
-            });
-          });
-        });
+        message: "No job records found",
       });
+    }
+
+    /*
+==============================
+DELETE OLD JOBS
+==============================
+*/
+
+    for (let email of targetEmails) {
+      await db
+        .promise()
+        .query("DELETE FROM career_jobs WHERE target_email=?", [email]);
+    }
+
+    /*
+==============================
+INSERT NEW JOBS
+==============================
+*/
+
+    for (let email of targetEmails) {
+      for (let job of jobs) {
+        await db.promise().query(
+          `
+INSERT INTO career_jobs
+(
+target_email,
+job_role,
+location,
+job_type,
+description,
+vacancies
+)
+VALUES(?,?,?,?,?,?)
+`,
+
+          [
+            email,
+            job.job_role,
+            job.location,
+            job.job_type,
+            job.description,
+            job.vacancies,
+          ],
+        );
+      }
+    }
+
+    fs.unlinkSync(req.file.path);
+
+    return res.json({
+      success: true,
+
+      message: "Jobs uploaded successfully",
+
+      totalJobs: jobs.length,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.log(error);
 
-    deleteFile();
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Upload failed",
+
+      message: "Server error",
     });
   }
 });
 /* ================= APPLY JOB ================= */
-app.post("/api/apply", upload.single("resume"), (req, res) => {
-  const { name, email, phone, role } = req.body;
 
-  const filePath = req.file?.path;
+app.get("/api/career/jobs", async (req, res) => {
+  try {
+    const [rows] = await db.promise().query(
+      `
+SELECT *
+FROM career_jobs
+ORDER BY id DESC
+`,
+    );
 
-  const deleteFile = () => {
+    res.json({
+      success: true,
+      jobs: rows,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+app.post("/api/apply", upload.single("resume"), async (req, res) => {
+  const connection = await db.promise().getConnection();
+
+  try {
+    const {
+      job_ids,
+      name,
+      email,
+      phone,
+      experience_type,
+      current_salary,
+      expected_salary,
+    } = req.body;
+
+    const applicantEmail = email?.trim().toLowerCase();
+
+    let selectedJobs = [];
+
     try {
-      if (filePath && fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  if (!name || !email || !phone || !role) {
-    deleteFile();
-    return res.status(400).json({
-      success: false,
-      message: "Missing fields",
-    });
-  }
-
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      message: "Resume file required",
-    });
-  }
-
-  if (req.file.mimetype !== "application/pdf") {
-    deleteFile();
-    return res.status(400).json({
-      success: false,
-      message: "Only PDF resume allowed",
-    });
-  }
-
-  /* ================= ⭐ FIX START HERE ================= */
-
-  const roles = role.split(",").map((r) => r.trim());
-
-  db.query(
-    `SELECT DISTINCT target_email FROM jobs WHERE role IN (?)`,
-    [roles],
-    (err, result) => {
-      if (err) {
-        deleteFile();
-        return res.status(500).json({
-          success: false,
-          message: "Database error",
-        });
-      }
-
-      if (!result.length) {
-        deleteFile();
-        return res.status(404).json({
-          success: false,
-          message: "Job not found",
-        });
-      }
-
-      const targetEmail = result[0].target_email;
-
-      res.json({
-        success: true,
-        message: "Application received",
+      selectedJobs = JSON.parse(job_ids || "[]");
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid job selection.",
       });
+    }
 
-      transporter.sendMail(
-        {
+    const resumePath = req.file?.path;
+
+    const deleteResume = () => {
+      try {
+        if (resumePath && fs.existsSync(resumePath)) {
+          fs.unlinkSync(resumePath);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    /* ================= REQUIRED FIELDS ================= */
+
+    if (
+      !Array.isArray(selectedJobs) ||
+      selectedJobs.length === 0 ||
+      !name ||
+      !applicantEmail ||
+      !phone ||
+      !experience_type ||
+      !expected_salary
+    ) {
+      deleteResume();
+
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all required fields.",
+      });
+    }
+
+    /* ================= RESUME VALIDATION ================= */
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume is required.",
+      });
+    }
+
+    if (req.file.mimetype !== "application/pdf") {
+      deleteResume();
+
+      return res.status(400).json({
+        success: false,
+        message: "Only PDF resumes are allowed.",
+      });
+    }
+
+    /* ================= FETCH JOBS ================= */
+
+    const [jobs] = await connection.query(
+      `SELECT * FROM career_jobs WHERE id IN (?)`,
+      [selectedJobs],
+    );
+
+    if (jobs.length !== selectedJobs.length) {
+      deleteResume();
+
+      return res.status(404).json({
+        success: false,
+        message: "One or more selected jobs were not found.",
+      });
+    }
+
+    /* ================= VALIDATE & INSERT ================= */
+
+    for (const job of jobs) {
+      // Duplicate check
+      const [alreadyApplied] = await connection.query(
+        `SELECT id
+         FROM applications
+         WHERE job_id = ?
+         AND applicant_email = ?`,
+        [job.id, applicantEmail],
+      );
+
+      if (alreadyApplied.length > 0) {
+        deleteResume();
+
+        return res.status(400).json({
+          success: false,
+          message: `You have already applied for "${job.job_role}".`,
+        });
+      }
+
+      // Maximum 20 applications
+      const [count] = await connection.query(
+        `SELECT COUNT(*) AS total
+         FROM applications
+         WHERE job_id = ?`,
+        [job.id],
+      );
+
+      if (count[0].total >= 20) {
+        deleteResume();
+
+        return res.status(400).json({
+          success: false,
+          message: `"${job.job_role}" already received 20 applications.`,
+        });
+      }
+
+      // Save application
+      await connection.query(
+        `INSERT INTO applications
+        (
+          job_id,
+          applicant_name,
+          applicant_email,
+          applicant_phone,
+          experience_type,
+          current_salary,
+          expected_salary,
+          resume_path,
+          status
+        )
+        VALUES (?,?,?,?,?,?,?,?,?)`,
+        [
+          job.id,
+          name,
+          applicantEmail,
+          phone,
+          experience_type,
+          current_salary || null,
+          expected_salary,
+          resumePath,
+          "Pending",
+        ],
+      );
+    }
+
+    /* ================= SEND EMAIL ================= */
+    // All selected job roles
+    const selectedRoles = jobs.map((job) => job.job_role).join(", ");
+
+    for (const job of jobs) {
+      try {
+        let mailText =
+          `Selected Job Roles : ${selectedRoles}\n\n` +
+          `Applicant Name : ${name}\n` +
+          `Email : ${applicantEmail}\n` +
+          `Phone : ${phone}\n` +
+          `Experience : ${experience_type}\n`;
+
+        // Show current salary only for experienced candidates
+        if (experience_type === "Experienced") {
+          mailText += `Current Salary : ${current_salary}\n`;
+        }
+
+        mailText += `Expected Salary : ${expected_salary}`;
+
+        await transporter.sendMail({
           from: process.env.EMAIL_USER,
-          to: targetEmail,
-          subject: `New Application - ${role}`,
-          text:
-            `Name: ${name}\n` +
-            `Email: ${email}\n` +
-            `Phone: ${phone}\n` +
-            `Role: ${role}`,
+          to: job.target_email,
+          subject: `New Application - ${name}`,
+          text: mailText,
           attachments: [
             {
               filename: req.file.originalname,
-              path: filePath,
+              path: resumePath,
             },
           ],
-        },
-        () => {
-          deleteFile();
-        },
-      );
-    },
-  );
-});
-/* ================= GET JOBS ================= */
-app.get("/api/jobs", (req, res) => {
-  db.query("SELECT * FROM jobs", (err, result) => {
-    if (err) return res.status(500).json({ success: false, jobs: [] });
+        });
+      } catch (mailErr) {
+        console.log("Mail Error:", mailErr);
+      }
+    }
 
-    res.json({ success: true, jobs: result });
-  });
+    deleteResume();
+
+    return res.json({
+      success: true,
+      message: "Application submitted successfully.",
+    });
+  } catch (err) {
+    console.log("Apply Error:", err);
+
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error.",
+    });
+  } finally {
+    connection.release();
+  }
 });
 
 /* ================= ROLES ================= */
 app.get("/api/roles", (req, res) => {
-  db.query("SELECT id, role FROM jobs", (err, result) => {
-    if (err) return res.status(500).json({ success: false, roles: [] });
+  db.query(
+    `
+    SELECT
+      id,
+      job_role AS role
+    FROM career_jobs
+    ORDER BY job_role ASC
+    `,
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          roles: [],
+        });
+      }
+
+      res.json({
+        success: true,
+        roles: result,
+      });
+    },
+  );
+});
+
+/* ================= GET APPLICATIONS ================= */
+
+/* ================= GET APPLICATIONS ================= */
+
+app.get("/api/applications", async (req, res) => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT
+        a.id,
+        a.job_id,
+        a.applicant_name,
+        a.applicant_email,
+        a.applicant_phone,
+        a.experience_type,
+        a.current_salary,
+        a.expected_salary,
+        a.status,
+        a.applied_at,
+        c.job_role
+      FROM applications a
+      INNER JOIN career_jobs c
+        ON a.job_id = c.id
+      ORDER BY a.applied_at DESC
+    `);
 
     res.json({
       success: true,
-      roles: result, // now contains id + role
+      applications: rows,
     });
-  });
-});
+  } catch (err) {
+    console.log(err);
 
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+});
+/* ================= UPDATE APPLICATION STATUS ================= */
+
+app.put("/api/applications/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    await db.promise().query(
+      `
+      UPDATE applications
+      SET status=?
+      WHERE id=?
+      `,
+      [status, id],
+    );
+
+    res.json({
+      success: true,
+      message: "Status updated successfully",
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Update failed",
+    });
+  }
+});
+/* ================= DELETE APPLICATION ================= */
+
+app.delete("/api/applications/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.promise().query(
+      `
+      DELETE FROM applications
+      WHERE id=?
+      `,
+      [id],
+    );
+
+    res.json({
+      success: true,
+      message: "Application deleted successfully",
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Delete failed",
+    });
+  }
+});
 /* ================= WEBSOCKET ================= */
 
 const server = http.createServer(app);

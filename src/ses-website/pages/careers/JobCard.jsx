@@ -12,14 +12,17 @@ function JobCard({ job }) {
   return (
     <div className="job-card">
       <div className="job-card-top">
-        <h3>{job.role}</h3>
-        <span className="job-badge">{job.type}</span>
+        <h3>{job.job_role}</h3>
+
+        <span className="job-badge">{job.job_type}</span>
       </div>
 
       <div className="job-details">
         <p>📍 {job.location}</p>
-        <p>💼 {job.type}</p>
-        <p>👥 Vacancies: {job.vacancies || job.total_vacancies || 0}</p>
+
+        <p>💼 {job.job_type}</p>
+
+        <p>👥 Vacancies: {job.vacancies || 0}</p>
       </div>
 
       <p>{job.description}</p>

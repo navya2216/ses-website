@@ -12,19 +12,16 @@ function AdminLogin() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-
-  const [showOTP, setShowOTP] = useState(false);
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
 
   const [success, setSuccess] = useState("");
-
   const [error, setError] = useState("");
 
-  const sendOTP = async () => {
-    if (!email.trim()) {
-      setError("Please enter Admin Email.");
+  const login = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Email and Password are required.");
       return;
     }
 
@@ -33,46 +30,21 @@ function AdminLogin() {
       setError("");
       setSuccess("");
 
-      const res = await axios.post(`${API}/api/admin/send-otp`, {
+      const res = await axios.post(`${API}/api/admin/login`, {
         email,
+        password,
       });
 
       if (res.data.success) {
-        setShowOTP(true);
-        setSuccess("OTP sent successfully.");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyOTP = async () => {
-    if (!otp.trim()) {
-      setError("Please enter OTP.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
-
-      const res = await axios.post(`${API}/api/admin/verify-otp`, {
-        email,
-        otp,
-      });
-
-      if (res.data.success) {
-        localStorage.setItem("adminEmail", email);
+        localStorage.setItem("adminEmail", res.data.admin.email);
+        localStorage.setItem("adminName", res.data.admin.name);
 
         setSuccess("Login Successful.");
 
         navigate("/admin/dashboard");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid OTP.");
+      setError(err.response?.data?.message || "Login Failed.");
     } finally {
       setLoading(false);
     }
@@ -87,10 +59,9 @@ function AdminLogin() {
 
         <h2>Admin Login</h2>
 
-        <p>Login using your registered Admin Email.</p>
+        <p>Login using your registered Email and Password.</p>
 
         {success && <div className="success-box">{success}</div>}
-
         {error && <div className="error-box">{error}</div>}
 
         <div className="form-group">
@@ -101,44 +72,31 @@ function AdminLogin() {
 
             <input
               type="email"
-              placeholder="Enter Admin Email"
+              placeholder="Enter Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
 
-        {!showOTP ? (
-          <button className="login-btn" onClick={sendOTP} disabled={loading}>
-            {loading ? "Sending..." : "Send OTP"}
-          </button>
-        ) : (
-          <>
-            <div className="form-group">
-              <label>OTP</label>
+        <div className="form-group">
+          <label>Password</label>
 
-              <div className="input-box">
-                <FaLock />
+          <div className="input-box">
+            <FaLock />
 
-                <input
-                  type="text"
-                  placeholder="Enter OTP"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-              </div>
-            </div>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+        </div>
 
-            <button
-              className="login-btn"
-              onClick={verifyOTP}
-              disabled={loading}
-            >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-          </>
-        )}
+        <button className="login-btn" onClick={login} disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
       </div>
     </div>
   );

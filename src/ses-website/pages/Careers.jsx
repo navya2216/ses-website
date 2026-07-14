@@ -22,12 +22,11 @@ function Careers() {
       setLoading(true);
       setError("");
 
-      const res = await axios.get(`${API}/api/jobs`);
+      const res = await axios.get(`${API}/api/career/jobs`);
 
       console.log("API Response:", res.data);
 
       if (res.data.success) {
-        console.log("Jobs:", res.data.jobs);
         setJobs(res.data.jobs || []);
       } else {
         setJobs([]);
@@ -35,7 +34,9 @@ function Careers() {
       }
     } catch (err) {
       console.error("Jobs Fetch Error:", err);
+
       setJobs([]);
+
       setError("Unable to load jobs. Please try again later.");
     } finally {
       setLoading(false);

@@ -1,110 +1,129 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 import {
+  FaHome,
   FaUsers,
   FaUserTie,
   FaFileExcel,
+  FaUpload,
   FaClipboardList,
+  FaSignOutAlt,
 } from "react-icons/fa";
-
-import SuperSidebar from "../../components/superadmin/SuperSidebar";
-import SuperHeader from "../../components/superadmin/SuperHeader";
 
 import "../../asset/css/superadmin-dashboard.css";
 
 function SuperAdminDashboard() {
+  const navigate = useNavigate();
+
+  const email = localStorage.getItem("superAdminEmail");
+
+  useEffect(() => {
+    if (!email) {
+      navigate("/superadmin/login");
+    }
+  }, [email, navigate]);
+
+  const logout = () => {
+    if (!window.confirm("Are you sure you want to Logout?")) return;
+
+    localStorage.removeItem("superAdminEmail");
+
+    navigate("/superadmin/login");
+  };
+
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <SuperSidebar />
+    <div className="superadmin-page">
+      {/* Header */}
 
-      {/* Main Content */}
-      <main className="dashboard-content">
-        <SuperHeader title="Super Admin Dashboard" />
+      <header className="superadmin-header">
+        <div>
+          <h2>SES Career Portal</h2>
+          <p>Super Admin Dashboard</p>
+        </div>
 
-        {/* Welcome */}
-        <section className="welcome-card">
-          <h2>Welcome Super Admin 👋</h2>
+        <div className="header-right">
+          <span>{email}</span>
 
-          <p>
-            Manage Admins, Upload Jobs, View Applications and control the Career
-            Portal.
-          </p>
-        </section>
+          <button className="logout-btn" onClick={logout}>
+            <FaSignOutAlt />
+            Logout
+          </button>
+        </div>
+      </header>
 
-        {/* Statistics */}
-        <section className="stats-grid">
-          <div className="stat-card">
-            <FaUsers className="stat-icon" />
+      {/* Navigation */}
 
-            <h2>0</h2>
+      <div className="top-navigation">
+        <Link to="/superadmin/dashboard" className="nav-btn">
+          <FaHome />
+          Dashboard
+        </Link>
 
-            <p>Total Admins</p>
-          </div>
+        <Link to="/superadmin/create-admin" className="nav-btn">
+          <FaUserTie />
+          Create Admin
+        </Link>
 
-          <div className="stat-card">
-            <FaFileExcel className="stat-icon" />
+        <Link to="/superadmin/admin-list" className="nav-btn">
+          <FaUsers />
+          Admin List
+        </Link>
 
-            <h2>0</h2>
+        <Link to="/superadmin/download-template" className="nav-btn">
+          <FaFileExcel />
+          Download Template
+        </Link>
 
-            <p>Total Job Uploads</p>
-          </div>
+        <Link to="/admin/upload-jobs" className="nav-btn">
+          <FaUpload />
+          Upload Jobs
+        </Link>
 
-          <div className="stat-card">
-            <FaClipboardList className="stat-icon" />
+        <Link to="/admin/applications" className="nav-btn">
+          <FaClipboardList />
+          Applications
+        </Link>
+      </div>
 
-            <h2>0</h2>
+      {/* Welcome */}
 
-            <p>Total Applications</p>
-          </div>
-        </section>
+      <div className="welcome-card">
+        <h2>Welcome Super Admin 👋</h2>
 
-        {/* Quick Actions */}
+        <p>
+          Manage Career Admins, Job Uploads, Download Templates and Candidate
+          Applications.
+        </p>
+      </div>
 
-        <h2 className="section-title">Quick Actions</h2>
+      {/* Statistics */}
 
-        {/* <section className="action-grid">
-          <Link className="action-card" to="/superadmin/create-admin">
-            <FaUserTie className="action-icon" />
+      <div className="stats-grid">
+        <div className="stat-card">
+          <FaUsers className="stat-icon" />
 
-            <h3>Create Admin</h3>
+          <h2>0</h2>
 
-            <p>Create New Career Admin</p>
-          </Link>
+          <p>Total Admins</p>
+        </div>
 
-          <Link className="action-card" to="/superadmin/admin-list">
-            <FaUsers className="action-icon" />
+        <div className="stat-card">
+          <FaUpload className="stat-icon" />
 
-            <h3>Admin List</h3>
+          <h2>0</h2>
 
-            <p>View All Admins</p>
-          </Link>
+          <p>Total Job Uploads</p>
+        </div>
 
-          <Link className="action-card" to="/admin/download-template">
-            <FaFileExcel className="action-icon" />
+        <div className="stat-card">
+          <FaClipboardList className="stat-icon" />
 
-            <h3>Download Excel Template</h3>
+          <h2>0</h2>
 
-            <p>Download Sample Excel Sheet</p>
-          </Link>
-
-          <Link className="action-card" to="/admin/upload-jobs">
-            <FaFileExcel className="action-icon" />
-
-            <h3>Upload Jobs</h3>
-
-            <p>Upload Job Excel File</p>
-          </Link>
-
-          <Link className="action-card" to="/admin/applications">
-            <FaClipboardList className="action-icon" />
-
-            <h3>Applications</h3>
-
-            <p>View Candidate Applications</p>
-          </Link>
-        </section> */}
-      </main>
+          <p>Total Applications</p>
+        </div>
+      </div>
     </div>
   );
 }

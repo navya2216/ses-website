@@ -1,0 +1,134 @@
+.upload-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px;
+}
+
+.upload-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.upload-header h2 {
+  color: #1e3a8a;
+}
+
+.back-btn {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.back-btn:hover {
+  background: #1d4ed8;
+}
+
+.upload-card {
+  max-width: 650px;
+  margin: auto;
+  background: #fff;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.excel-icon {
+  font-size: 70px;
+  color: #1d6f42;
+  margin-bottom: 20px;
+}
+
+.upload-card h3 {
+  margin-bottom: 10px;
+}
+
+.upload-card p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.upload-card input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #2563eb;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.selected-file {
+  background: #eef6ff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  word-break: break-word;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.upload-btn,
+.clear-btn {
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.upload-btn {
+  background: #16a34a;
+}
+
+.upload-btn:hover {
+  background: #15803d;
+}
+
+.clear-btn {
+  background: #dc2626;
+}
+
+.clear-btn:hover {
+  background: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .upload-page {
+    padding: 20px;
+  }
+
+  .upload-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .upload-card {
+    padding: 25px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .upload-btn,
+  .clear-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

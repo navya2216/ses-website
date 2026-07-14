@@ -7,7 +7,7 @@ function ApplyForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [role, setRole] = useState([]);
+  const [jobIds, setJobIds] = useState([]);
   const [resume, setResume] = useState(null);
 
   const [experienceType, setExperienceType] = useState("");
@@ -95,9 +95,9 @@ function ApplyForm() {
     } else if (!/^[0-9]{10}$/.test(phone)) {
       temp.phone = "Phone must be 10 digits";
     }
-
-    if (role.length === 0) temp.role = "Select at least one role";
-
+    if (jobIds.length === 0) {
+      temp.role = "Please select at least one role";
+    }
     if (!resume) {
       temp.resume = "Resume is required";
     } else if (resume.type !== "application/pdf") {
@@ -132,10 +132,10 @@ function ApplyForm() {
     formData.append("name", name);
     formData.append("email", email);
     formData.append("phone", phone);
-    formData.append("experienceType", experienceType);
-    formData.append("currentSalary", currentSalary);
-    formData.append("expectedSalary", expectedSalary);
-    formData.append("role", role.join(", "));
+    formData.append("job_ids", JSON.stringify(jobIds));
+    formData.append("experience_type", experienceType);
+    formData.append("current_salary", currentSalary);
+    formData.append("expected_salary", expectedSalary);
 
     formData.append("resume", resume);
 
@@ -158,8 +158,12 @@ function ApplyForm() {
         setName("");
         setEmail("");
         setPhone("");
-        setRole([]);
+        setJobIds([]); // <-- Fix here
+        setExperienceType("");
+        setCurrentSalary("");
+        setExpectedSalary("");
         setResume(null);
+        setErrors({});
         setErrors({});
         // ⭐ IMPORTANT FIX
         if (fileRef.current) {
@@ -180,14 +184,10 @@ function ApplyForm() {
   return (
     <div className="apply-form container">
       <h2 className="text-center mb-4">Apply for a Position</h2>
-
       {/* ERROR / SUCCESS */}
-
       {apiError && <div className="error-message">{apiError}</div>}
-
       {successMsg && <div className="success-message">{successMsg}</div>}
       {/* NAME */}
-
       <div className="input-group">
         <input
           type="text"
@@ -207,9 +207,7 @@ function ApplyForm() {
 
         {errors.name && <small className="text-danger">{errors.name}</small>}
       </div>
-
       {/* EMAIL */}
-
       <div className="input-group">
         <input
           type="email"
@@ -229,9 +227,7 @@ function ApplyForm() {
 
         {errors.email && <small className="text-danger">{errors.email}</small>}
       </div>
-
       {/* PHONE */}
-
       <div className="input-group">
         <input
           type="tel"
@@ -251,7 +247,6 @@ function ApplyForm() {
 
         {errors.phone && <small className="text-danger">{errors.phone}</small>}
       </div>
-
       {/* Experience Section */}
       <div className="input-group">
         <label>Experience</label>
@@ -276,7 +271,6 @@ function ApplyForm() {
           <small className="text-danger">{errors.experienceType}</small>
         )}
       </div>
-
       {/* Salary Fields */}
       <div className="salary-row">
         {experienceType === "Experienced" && (
@@ -312,65 +306,63 @@ function ApplyForm() {
         </div>
       </div>
       {/* ROLE SECTION */}
-
       {/* ROLE SECTION */}
-
       <div className="input-group">
-        <label>Select Role</label>
+        <label>Select Roles</label>
 
-        <div className="role-select-box">
-          <div className="role-chip-container">
-            {role.map((item, index) => (
-              <span key={index} className="role-chip">
-                {item}
+        <div className="role-chip-container">
+          {jobIds.map((id) => {
+            const role = roleOptions.find((r) => String(r.id) === String(id));
+
+            return (
+              <span key={id} className="role-chip">
+                {role?.role}
 
                 <span
                   className="remove-role"
-                  onClick={() => {
-                    setRole(role.filter((r) => r !== item));
-                  }}
+                  onClick={() =>
+                    setJobIds(jobIds.filter((item) => item !== id))
+                  }
                 >
                   ❌
                 </span>
               </span>
+            );
+          })}
+
+          <select
+            className="role-dropdown"
+            value=""
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (value && !jobIds.includes(value)) {
+                setJobIds([...jobIds, value]);
+              }
+
+              setErrors((prev) => ({
+                ...prev,
+                role: "",
+              }));
+
+              setApiError("");
+
+              e.target.value = "";
+            }}
+          >
+            <option value="">Select Role</option>
+
+            {roleOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.role}
+              </option>
             ))}
-
-            <select
-              className="role-dropdown"
-              value=""
-              onChange={(e) => {
-                const value = e.target.value;
-
-                if (value && !role.includes(value)) {
-                  setRole([...role, value]);
-                }
-
-                setErrors((prev) => ({
-                  ...prev,
-                  role: "",
-                }));
-
-                setApiError("");
-
-                e.target.value = "";
-              }}
-            >
-              <option value="">Select Role</option>
-
-              {roleOptions.map((item) => (
-                <option key={item.id} value={item.role}>
-                  {item.role}
-                </option>
-              ))}
-            </select>
-          </div>
+          </select>
         </div>
 
         {errors.role && <small className="text-danger">{errors.role}</small>}
-      </div>
-
+      </div>{" "}
       {/* RESUME */}
-
       <div className="upload-box">
         <label>Upload Resume (PDF only)</label>
 
@@ -403,9 +395,7 @@ function ApplyForm() {
           <small className="text-danger">{errors.resume}</small>
         )}
       </div>
-
       {/* SUBMIT */}
-
       <button
         className="submit-btn"
         onClick={submitApplication}
