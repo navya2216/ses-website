@@ -125,8 +125,7 @@ function Applications() {
                     <td>{item.applicant_email}</td>
 
                     <td>{item.applicant_phone}</td>
-
-                    <td>{item.job_role}</td>
+                    <td>{item.selected_roles}</td>
 
                     <td>{item.experience_type}</td>
 
@@ -142,13 +141,12 @@ function Applications() {
 
                     <td>
                       <select
+                        className={`status-select ${item.status.toLowerCase()}`}
                         value={item.status}
                         onChange={(e) => updateStatus(item.id, e.target.value)}
                       >
                         <option value="Pending">Pending</option>
-
-                        <option value="Selected">Selected</option>
-
+                        <option value="Shortlisted">Shortlisted</option>
                         <option value="Rejected">Rejected</option>
                       </select>
                     </td>

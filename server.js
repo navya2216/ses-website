@@ -71,15 +71,179 @@ function normalizeEmail(email) {
 /* ================= MULTER ================= */
 const upload = multer({ dest: "uploads/" });
 
-app.post("/api/superadmin/send-otp", async (req, res) => {
+/* ===================== COMMON LOGIN ===================== */
+
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   const key = normalizeEmail(email);
 
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and Password are required",
+    });
+  }
+
+  /* ==========================================
+      STEP 1 : CHECK SUPER ADMIN
+  ========================================== */
+
   db.query(
     "SELECT * FROM super_admin WHERE LOWER(email)=?",
     [key],
-    async (err, rows) => {
+    async (err, superRows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database Error",
+        });
+      }
+
+      // SUPER ADMIN FOUND
+      if (superRows.length > 0) {
+        const superAdmin = superRows[0];
+
+        if (superAdmin.password !== password) {
+          return res.status(401).json({
+            success: false,
+            message: "Invalid Password",
+          });
+        }
+
+        // Remove previous OTP
+        otpStore.delete(key);
+
+        const otp = generateOTP();
+
+        otpStore.set(key, {
+          otp,
+          role: "SUPER_ADMIN",
+          verified: false,
+          expiry: Date.now() + 5 * 60 * 1000,
+        });
+
+        try {
+          await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: superAdmin.email,
+            subject: "Super Admin OTP",
+            text: `Your OTP is ${otp}`,
+          });
+
+          return res.json({
+            success: true,
+            role: "SUPER_ADMIN",
+            otpRequired: true,
+            message: "OTP Sent Successfully",
+          });
+        } catch (mailErr) {
+          console.log(mailErr);
+
+          return res.status(500).json({
+            success: false,
+            message: "Unable to send OTP",
+          });
+        }
+      }
+
+      /* ==========================================
+          STEP 2 : CHECK ADMIN
+      ========================================== */
+
+      db.query(
+        "SELECT * FROM admins WHERE LOWER(email)=? AND status='Active'",
+        [key],
+        (err2, adminRows) => {
+          if (err2) {
+            return res.status(500).json({
+              success: false,
+              message: "Database Error",
+            });
+          }
+
+          if (adminRows.length === 0) {
+            return res.status(404).json({
+              success: false,
+              message: "User not found",
+            });
+          }
+
+          const admin = adminRows[0];
+
+          if (admin.password !== password) {
+            return res.status(401).json({
+              success: false,
+              message: "Invalid Password",
+            });
+          }
+
+          loginUsers.set(key, {
+            role: "ADMIN",
+            adminId: admin.id,
+            loginTime: Date.now(),
+          });
+
+          return res.json({
+            success: true,
+            role: "ADMIN",
+            otpRequired: false,
+            message: "Login Successful",
+
+            admin: {
+              id: admin.id,
+              name: admin.name,
+              email: admin.email,
+            },
+          });
+        },
+      );
+    },
+  );
+});
+
+/* ================= VERIFY OTP ================= */
+
+app.post("/api/verify-otp", (req, res) => {
+  const { email, otp } = req.body;
+
+  const key = normalizeEmail(email);
+
+  const data = otpStore.get(key);
+
+  if (!data) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP Not Found",
+    });
+  }
+
+  // Check OTP Expiry
+  if (Date.now() > data.expiry) {
+    otpStore.delete(key);
+
+    return res.status(400).json({
+      success: false,
+      message: "OTP Expired",
+    });
+  }
+
+  // Check OTP
+  if (data.otp !== otp) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid OTP",
+    });
+  }
+
+  // OTP Verified
+  data.verified = true;
+
+  // Fetch Super Admin Details
+  db.query(
+    "SELECT id, name, email FROM super_admin WHERE LOWER(email)=?",
+    [key],
+    (err, rows) => {
       if (err) {
         return res.status(500).json({
           success: false,
@@ -94,90 +258,34 @@ app.post("/api/superadmin/send-otp", async (req, res) => {
         });
       }
 
-      // Check Password
-      if (rows[0].password !== password) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid Password",
-        });
-      }
+      const superAdmin = rows[0];
 
-      otpStore.delete(key);
-
-      const otp = generateOTP();
-
-      otpStore.set(key, {
-        otp,
+      // Store Login Session
+      loginUsers.set(key, {
         role: "SUPER_ADMIN",
-        verified: false,
-        expiry: Date.now() + 5 * 60 * 1000,
+        superAdminId: superAdmin.id,
+        loginTime: Date.now(),
       });
 
-      try {
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: rows[0].email,
-          subject: "Super Admin OTP",
-          text: `Your OTP is ${otp}`,
-        });
+      console.log("SUPER ADMIN LOGIN SUCCESS");
+      console.log(loginUsers);
 
-        res.json({
-          success: true,
-          message: "OTP Sent",
-        });
-      } catch (e) {
-        console.log(e);
+      // Remove OTP after successful verification
+      otpStore.delete(key);
 
-        res.status(500).json({
-          success: false,
-          message: "Mail Failed",
-        });
-      }
+      return res.json({
+        success: true,
+        role: "SUPER_ADMIN",
+        message: "Login Successful",
+
+        superAdmin: {
+          id: superAdmin.id,
+          name: superAdmin.name,
+          email: superAdmin.email,
+        },
+      });
     },
   );
-});
-app.post("/api/superadmin/verify-otp", (req, res) => {
-  const { email, otp } = req.body;
-
-  const key = normalizeEmail(email);
-
-  const data = otpStore.get(key);
-
-  if (!data) {
-    return res.status(400).json({
-      success: false,
-      message: "OTP Not Found",
-    });
-  }
-
-  if (Date.now() > data.expiry) {
-    return res.status(400).json({
-      success: false,
-      message: "OTP Expired",
-    });
-  }
-
-  if (data.otp !== otp) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid OTP",
-    });
-  }
-
-  data.verified = true;
-
-  loginUsers.set(key, {
-    role: "SUPER_ADMIN",
-    loginTime: Date.now(),
-  });
-
-  console.log("SUPER ADMIN LOGIN SUCCESS");
-  console.log(loginUsers);
-
-  res.json({
-    success: true,
-    message: "Login Successful",
-  });
 });
 
 /* ================= CREATE ADMIN ================= */
@@ -308,56 +416,6 @@ app.get("/api/admins", (req, res) => {
   );
 });
 
-/* ================= ADMIN LOGIN ================= */
-app.post("/api/admin/login", (req, res) => {
-  const { email, password } = req.body;
-
-  db.query(
-    "SELECT * FROM admins WHERE LOWER(email)=LOWER(?) AND status='Active'",
-    [email],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Database Error",
-        });
-      }
-
-      if (rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "Admin Not Found",
-        });
-      }
-
-      const admin = rows[0];
-
-      if (admin.password !== password) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid Password",
-        });
-      }
-
-      loginUsers.set(admin.email.toLowerCase(), {
-        role: "ADMIN",
-        adminId: admin.id,
-        loginTime: Date.now(),
-      });
-
-      res.json({
-        success: true,
-        message: "Login Successful",
-        admin: {
-          id: admin.id,
-          name: admin.name,
-          email: admin.email,
-        },
-      });
-    },
-  );
-});
-
 app.put("/api/admins/:id", (req, res) => {
   const { id } = req.params;
   const { name, email, password, phone } = req.body;
@@ -422,9 +480,6 @@ app.post("/api/admin/logout", (req, res) => {
     message: "Logout Successful",
   });
 });
-/* ================= UPLOAD JOBS ================= */
-
-// ================= FILE UPLOAD =================
 
 // ================= UPLOAD JOB EXCEL API =================
 
@@ -755,6 +810,8 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
       [selectedJobs],
     );
 
+    const selectedRoles = jobs.map((job) => job.job_role).join(", ");
+
     if (jobs.length !== selectedJobs.length) {
       deleteResume();
 
@@ -767,25 +824,50 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
     /* ================= VALIDATE & INSERT ================= */
 
     for (const job of jobs) {
-      // Duplicate check
+      /* ================= DUPLICATE APPLICATION CHECK ================= */
+
       const [alreadyApplied] = await connection.query(
-        `SELECT id
+        `SELECT status
          FROM applications
          WHERE job_id = ?
-         AND applicant_email = ?`,
+         AND LOWER(applicant_email) = LOWER(?)`,
         [job.id, applicantEmail],
       );
 
       if (alreadyApplied.length > 0) {
         deleteResume();
 
+        let message;
+
+        switch (alreadyApplied[0].status) {
+          case "Pending":
+            message = `You have already applied for "${job.job_role}". Your application is currently Pending.`;
+            break;
+
+          case "Shortlisted":
+            message = `You have already applied for "${job.job_role}". Your application has been Shortlisted.`;
+            break;
+
+          case "Rejected":
+            message = `You have already applied for "${job.job_role}". Your application was Rejected. You cannot apply again.`;
+            break;
+
+          case "Selected":
+            message = `You have already applied for "${job.job_role}". Your application has been Selected.`;
+            break;
+
+          default:
+            message = `You have already applied for "${job.job_role}".`;
+        }
+
         return res.status(400).json({
           success: false,
-          message: `You have already applied for "${job.job_role}".`,
+          message,
         });
       }
 
-      // Maximum 20 applications
+      /* ================= MAXIMUM 20 APPLICATIONS ================= */
+
       const [count] = await connection.query(
         `SELECT COUNT(*) AS total
          FROM applications
@@ -802,28 +884,33 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
         });
       }
 
-      // Save application
+      /* ================= SAVE APPLICATION ================= */
+      const selectedRoles = jobs.map((job) => job.job_role).join(", ");
+      const firstJobId = jobs[0].id;
+
       await connection.query(
         `INSERT INTO applications
-        (
-          job_id,
-          applicant_name,
-          applicant_email,
-          applicant_phone,
-          experience_type,
-          current_salary,
-          expected_salary,
-          resume_path,
-          status
-        )
-        VALUES (?,?,?,?,?,?,?,?,?)`,
+  (
+    job_id,
+    selected_roles,
+    applicant_name,
+    applicant_email,
+    applicant_phone,
+    experience_type,
+    current_salary,
+    expected_salary,
+    resume_path,
+    status
+  )
+  VALUES (?,?,?,?,?,?,?,?,?,?)`,
         [
-          job.id,
+          firstJobId,
+          selectedRoles,
           name,
           applicantEmail,
           phone,
           experience_type,
-          current_salary || null,
+          experience_type === "Experienced" ? current_salary : null,
           expected_salary,
           resumePath,
           "Pending",
@@ -831,41 +918,39 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
       );
     }
 
-    /* ================= SEND EMAIL ================= */
-    // All selected job roles
-    const selectedRoles = jobs.map((job) => job.job_role).join(", ");
+    // ================= SEND SINGLE EMAIL =================
 
-    for (const job of jobs) {
-      try {
-        let mailText =
-          `Selected Job Roles : ${selectedRoles}\n\n` +
-          `Applicant Name : ${name}\n` +
-          `Email : ${applicantEmail}\n` +
-          `Phone : ${phone}\n` +
-          `Experience : ${experience_type}\n`;
+    // Remove duplicate HR email addresses
+    const uniqueEmails = [...new Set(jobs.map((job) => job.target_email))];
 
-        // Show current salary only for experienced candidates
-        if (experience_type === "Experienced") {
-          mailText += `Current Salary : ${current_salary}\n`;
-        }
+    let mailText =
+      `Selected Job Roles : ${selectedRoles}\n\n` +
+      `Applicant Name : ${name}\n` +
+      `Email : ${applicantEmail}\n` +
+      `Phone : ${phone}\n` +
+      `Experience : ${experience_type}\n`;
 
-        mailText += `Expected Salary : ${expected_salary}`;
+    if (experience_type === "Experienced") {
+      mailText += `Current Salary : ${current_salary}\n`;
+    }
 
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: job.target_email,
-          subject: `New Application - ${name}`,
-          text: mailText,
-          attachments: [
-            {
-              filename: req.file.originalname,
-              path: resumePath,
-            },
-          ],
-        });
-      } catch (mailErr) {
-        console.log("Mail Error:", mailErr);
-      }
+    mailText += `Expected Salary : ${expected_salary}`;
+
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: uniqueEmails.join(","), // Send one email to all unique recipients
+        subject: `New Application - ${name}`,
+        text: mailText,
+        attachments: [
+          {
+            filename: req.file.originalname,
+            path: resumePath,
+          },
+        ],
+      });
+    } catch (mailErr) {
+      console.log("Mail Error:", mailErr);
     }
 
     deleteResume();
@@ -917,98 +1002,181 @@ app.get("/api/roles", (req, res) => {
 });
 
 /* ================= GET APPLICATIONS ================= */
+app.get("/api/applications", (req, res) => {
+  db.query(
+    `SELECT
+      id,
+      applicant_name,
+      applicant_email,
+      applicant_phone,
+      selected_roles,
+      experience_type,
+      current_salary,
+      expected_salary,
+      resume_path,
+      status,
+      applied_at
+     FROM applications
+     ORDER BY applied_at DESC`,
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database Error",
+        });
+      }
 
-/* ================= GET APPLICATIONS ================= */
-
-app.get("/api/applications", async (req, res) => {
-  try {
-    const [rows] = await db.promise().query(`
-      SELECT
-        a.id,
-        a.job_id,
-        a.applicant_name,
-        a.applicant_email,
-        a.applicant_phone,
-        a.experience_type,
-        a.current_salary,
-        a.expected_salary,
-        a.status,
-        a.applied_at,
-        c.job_role
-      FROM applications a
-      INNER JOIN career_jobs c
-        ON a.job_id = c.id
-      ORDER BY a.applied_at DESC
-    `);
-
-    res.json({
-      success: true,
-      applications: rows,
-    });
-  } catch (err) {
-    console.log(err);
-
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
+      res.json({
+        success: true,
+        applications: rows,
+      });
+    },
+  );
 });
-/* ================= UPDATE APPLICATION STATUS ================= */
+// Update Status API
 
-app.put("/api/applications/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
+app.put("/api/applications/:id", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
-    await db.promise().query(
-      `
-      UPDATE applications
-      SET status=?
-      WHERE id=?
-      `,
-      [status, id],
-    );
+  const allowed = ["Pending", "Shortlisted", "Rejected"];
 
-    res.json({
-      success: true,
-      message: "Status updated successfully",
-    });
-  } catch (err) {
-    console.log(err);
-
-    res.status(500).json({
+  if (!allowed.includes(status)) {
+    return res.status(400).json({
       success: false,
-      message: "Update failed",
+      message: "Invalid Status",
     });
   }
+
+  db.query(
+    "UPDATE applications SET status=? WHERE id=?",
+    [status, id],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database Error",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found.",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Status updated successfully.",
+      });
+    },
+  );
 });
-/* ================= DELETE APPLICATION ================= */
+// Get Single Application API (Optional)
+app.get("/api/applications/:id", (req, res) => {
+  db.query(
+    `SELECT *
+   FROM applications
+   WHERE id=?`,
+    [req.params.id],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database Error",
+        });
+      }
 
-app.delete("/api/applications/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found.",
+        });
+      }
 
-    await db.promise().query(
-      `
-      DELETE FROM applications
-      WHERE id=?
-      `,
-      [id],
-    );
+      res.json({
+        success: true,
+        application: rows[0],
+      });
+    },
+  );
+});
+
+// Delete Application API
+app.delete("/api/applications/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.query("DELETE FROM applications WHERE id=?", [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Database Error",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found.",
+      });
+    }
 
     res.json({
       success: true,
-      message: "Application deleted successfully",
+      message: "Application deleted successfully.",
     });
-  } catch (err) {
-    console.log(err);
+  });
+});
 
-    res.status(500).json({
-      success: false,
-      message: "Delete failed",
-    });
-  }
+/* ================= DASHBOARD STATISTICS ================= */
+
+app.get("/api/dashboard/stats", (req, res) => {
+  const stats = {};
+
+  db.query("SELECT COUNT(*) AS totalAdmins FROM admins", (err, adminResult) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Database Error",
+      });
+    }
+
+    stats.totalAdmins = adminResult[0].totalAdmins;
+
+    db.query(
+      "SELECT COUNT(*) AS totalJobs FROM career_jobs",
+      (err, jobResult) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            message: "Database Error",
+          });
+        }
+
+        stats.totalJobs = jobResult[0].totalJobs;
+
+        db.query(
+          "SELECT COUNT(*) AS totalApplications FROM applications",
+          (err, applicationResult) => {
+            if (err) {
+              return res.status(500).json({
+                success: false,
+                message: "Database Error",
+              });
+            }
+
+            stats.totalApplications = applicationResult[0].totalApplications;
+
+            res.json({
+              success: true,
+              stats,
+            });
+          },
+        );
+      },
+    );
+  });
 });
 /* ================= WEBSOCKET ================= */
 

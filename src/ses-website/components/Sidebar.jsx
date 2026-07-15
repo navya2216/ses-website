@@ -1,59 +1,105 @@
-import React, { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
-import "../asset/css/sidebar.css";
+// import React, { useState } from "react";
+// import { NavLink } from "react-router-dom";
+// import {
+//   FaBars,
+//   FaTimes,
+//   FaHome,
+//   FaInfoCircle,
+//   FaLaptopCode,
+//   FaProjectDiagram,
+//   FaBriefcase,
+//   FaEnvelope,
+//   FaUserShield,
+// } from "react-icons/fa";
 
-function Sidebar() {
-  const [sidebar, setSidebar] = useState(false);
+// import logo from "../asset/ses_logo.png";
+// import "../asset/css/sidebar.css";
 
-  return (
-    <>
-      <nav className="navbar">
-        <div className="container">
-          <button className="menu-btn" onClick={() => setSidebar(true)}>
-            <FaBars />
-          </button>
-        </div>
-      </nav>
+// function Sidebar() {
+//   const [sidebar, setSidebar] = useState(false);
 
-      <div className={`sidebar ${sidebar ? "active" : ""}`}>
-        <div className="sidebar-header">
-          <button className="close-btn" onClick={() => setSidebar(false)}>
-            <FaTimes />
-          </button>
-        </div>
+//   const closeSidebar = () => setSidebar(false);
 
-        <ul>
-          <li>
-            <a href="/">Home</a>
-          </li>
+//   return (
+//     <>
+//       {/* Menu Button */}
+//       <button className="menu-btn" onClick={() => setSidebar(true)}>
+//         <FaBars />
+//       </button>
 
-          <li>
-            <a href="/about">About</a>
-          </li>
+//       {/* Overlay */}
+//       {sidebar && <div className="overlay" onClick={closeSidebar}></div>}
 
-          <li>
-            <a href="/services">Services</a>
-          </li>
+//       {/* Sidebar */}
+//       <div className={`sidebar ${sidebar ? "active" : ""}`}>
+//         <div className="sidebar-header">
+//           <div className="sidebar-logo">
+//             <img src={logo} alt="SES Logo" />
 
-          <li>
-            <a href="/projects">Projects</a>
-          </li>
+//             <h4>
+//               <span>Soft</span>
+//               <br />
+//               Electronic <span>Solutions</span>
+//             </h4>
+//           </div>
+//           <button className="close-btn" onClick={() => setSidebar(false)}>
+//             <FaTimes />
+//           </button>
+//         </div>
 
-          <li>
-            <a href="/careers">Careers</a>
-          </li>
+//         <ul className="sidebar-menu">
+//           <li>
+//             <NavLink to="/" onClick={closeSidebar}>
+//               <FaHome className="icon" />
+//               Home
+//             </NavLink>
+//           </li>
 
-          <li>
-            <a href="/contact">Contact</a>
-          </li>
-        </ul>
-      </div>
+//           <li>
+//             <NavLink to="/about" onClick={closeSidebar}>
+//               <FaInfoCircle className="icon" />
+//               About
+//             </NavLink>
+//           </li>
 
-      {sidebar && (
-        <div className="overlay" onClick={() => setSidebar(false)}></div>
-      )}
-    </>
-  );
-}
+//           <li>
+//             <NavLink to="/services" onClick={closeSidebar}>
+//               <FaLaptopCode className="icon" />
+//               Services
+//             </NavLink>
+//           </li>
 
-export default Sidebar;
+//           <li>
+//             <NavLink to="/projects" onClick={closeSidebar}>
+//               <FaProjectDiagram className="icon" />
+//               Projects
+//             </NavLink>
+//           </li>
+
+//           <li>
+//             <NavLink to="/careers" onClick={closeSidebar}>
+//               <FaBriefcase className="icon" />
+//               Careers
+//             </NavLink>
+//           </li>
+
+//           <li>
+//             <NavLink to="/contact" onClick={closeSidebar}>
+//               <FaEnvelope className="icon" />
+//               Contact
+//             </NavLink>
+//           </li>
+
+//           <li className="login-item">
+//             <NavLink to="/login" onClick={closeSidebar}>
+//               <FaUserShield className="icon" />
+//               Admin Login
+//             </NavLink>
+//           </li>
+//         </ul>
+//       </div>
+//     </>
+//   );
+// }
+
+// export default Sidebar;

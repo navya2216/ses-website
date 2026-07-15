@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { FaUserShield } from "react-icons/fa";
 
 import CareerHero from "./careers/CareerHero";
 import JobsCarousel from "./careers/JobsCarousel";
@@ -52,17 +50,7 @@ function Careers() {
   return (
     <div className="career-page">
       {/* Admin Button */}
-      <div className="admin-float">
-        <Link to="/superadmin/login" className="admin-btn super-admin-btn">
-          <FaUserShield />
-          <span>Super Admin</span>
-        </Link>
 
-        <Link to="/admin/login" className="admin-btn admin-login-btn">
-          <FaUserShield />
-          <span>Admin</span>
-        </Link>
-      </div>
       {/* Hero Section */}
       <CareerHero />
 

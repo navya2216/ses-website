@@ -1,120 +1,97 @@
-/* =========================
-   Navbar
-========================= */
+/*==================================================
+            GOOGLE FONT
+==================================================*/
 
-.navbar {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-  padding: 12px 0;
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+* {
+  font-family: "Poppins", sans-serif;
 }
 
+/*==================================================
+                NAVBAR
+==================================================*/
+
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+  background: #fff;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+  padding: 14px 0;
+  transition: 0.4s;
+}
 .navbar-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 15px;
+  flex-wrap: nowrap;
 }
 
-/* =========================
-   Logo
-========================= */
-/* =========================
-   Logo
-========================= */
+/*==================================================
+                LOGO
+==================================================*/
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   text-decoration: none;
 }
 
 .logo img {
-  height: 55px;
-  transition: all 0.4s ease;
+  width: 60px;
+  transition: 0.4s;
 }
 
 .logo:hover img {
-  transform: scale(1.05);
+  transform: rotate(-8deg) scale(1.08);
 }
-
-/* Logo Text */
 
 .logo h3 {
   position: relative;
-
   margin: 0;
-
-  padding: 10px 22px;
-
-  font-size: 1.15rem;
-  font-weight: 800;
-
-  color: #4f63a6;
-
+  padding: 10px 25px;
   border-radius: 50px;
-
-  background: #ffffff;
-
+  background: #fff;
   overflow: hidden;
-
+  color: #4f63a6;
+  font-size: 20px;
+  font-weight: 800;
   z-index: 1;
 }
 
-/* Rotating Blue Orange Border */
-
 .logo h3::before {
   content: "";
-
   position: absolute;
-
-  top: -250%;
-  left: -250%;
-
-  width: 600%;
-  height: 600%;
-
+  inset: -250%;
   background: conic-gradient(#4f63a6, #e67d4b, #4f63a6, #e67d4b, #4f63a6);
-
   animation: borderRotate 5s linear infinite;
-
   z-index: -2;
 }
 
-/* White Center */
-
 .logo h3::after {
   content: "";
-
   position: absolute;
-
   inset: 2px;
-
-  background: white;
-
+  background: #fff;
   border-radius: 48px;
-
   z-index: -1;
 }
 
-/* SES Brand Colors */
-
-.logo h3 span {
+.logo span {
   color: #e67d4b;
-  transition: all 0.4s ease;
 }
-
-/* Hover Text Effect */
 
 .logo:hover h3 {
   color: #e67d4b;
 }
 
-.logo:hover h3 span {
+.logo:hover span {
   color: #4f63a6;
 }
-
-/* Border Rotation Animation */
 
 @keyframes borderRotate {
   100% {
@@ -122,175 +99,288 @@
   }
 }
 
-/* Mobile */
-
-@media (max-width: 991px) {
-  .logo img {
-    height: 45px;
-  }
-
-  .logo h3 {
-    font-size: 1rem;
-    padding: 8px 18px;
-  }
-}
-
-@media (max-width: 576px) {
-  .logo h3 {
-    display: none;
-  }
-}
-/* =========================
-   Desktop Menu
-========================= */
+/*==================================================
+            DESKTOP MENU
+==================================================*/
 
 .desktop-menu {
   display: flex;
-  gap: 25px;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  gap: 10px;
   list-style: none;
   margin: 0;
   padding: 0;
+  white-space: nowrap;
+}
+
+.desktop-menu li {
+  position: relative;
 }
 
 .desktop-menu a {
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
   color: #4f63a6;
+  text-decoration: none;
+  font-size: 16px;
   font-weight: 600;
-  position: relative;
-  transition: 0.3s ease;
+
+  transition: 0.35s;
+  padding: 8px 0;
 }
 
-.desktop-menu a:hover,
+.desktop-menu a svg {
+  font-size: 17px;
+}
+
+.desktop-menu a:hover {
+  color: #e67d4b;
+  transform: translateY(-2px);
+}
+
 .desktop-menu a.active {
   color: #e67d4b;
 }
-
-/* Underline Effect */
 
 .desktop-menu a::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -5px;
+  bottom: -6px;
+
   width: 0;
   height: 3px;
+
   background: #e67d4b;
+
   border-radius: 20px;
+
   transform: translateX(-50%);
-  transition: 0.3s ease;
+
+  transition: 0.35s;
 }
 
 .desktop-menu a:hover::after,
 .desktop-menu a.active::after {
-  width: 80%;
+  width: 85%;
 }
 
-/* =========================
-   Login Button
-========================= */
+/*==================================================
+            LOGIN BUTTON
+==================================================*/
 
 .login-btn {
   background: #4f63a6;
-  color: white !important;
-  padding: 10px 20px;
-  border-radius: 30px;
-  transition: 0.3s ease;
+  color: #fff !important;
+
+  padding: 12px 22px !important;
+
+  border-radius: 40px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  box-shadow: 0 12px 25px rgba(79, 99, 166, 0.25);
+
+  transition: 0.35s;
 }
 
 .login-btn:hover {
   background: #e67d4b;
-  transform: translateY(-2px);
+  color: #fff !important;
+
+  transform: translateY(-3px);
+
+  box-shadow: 0 18px 35px rgba(230, 125, 75, 0.35);
 }
 
-/* =========================
-   Mobile Menu Button
-========================= */
+.login-btn::after {
+  display: none;
+}
+
+/*==================================================
+            MENU BUTTON
+==================================================*/
 
 .menu-btn {
   display: none;
+
   border: none;
-  background: transparent;
-  font-size: 28px;
-  color: #4f63a6;
+  outline: none;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 12px;
+
+  background: #4f63a6;
+
+  color: #fff;
+
   cursor: pointer;
-  transition: 0.3s ease;
+
+  font-size: 23px;
+
+  transition: 0.35s;
 }
 
 .menu-btn:hover {
-  color: #e67d4b;
-  transform: scale(1.1);
+  background: #e67d4b;
+  transform: scale(1.08);
 }
-
-/* =========================
-   Sidebar
-========================= */
+/*==================================================
+                SIDEBAR
+==================================================*/
 
 .sidebar {
   position: fixed;
   top: 0;
-  left: -320px;
-  width: 300px;
+  left: -330px;
+  width: 310px;
   height: 100vh;
-  background: white;
-  z-index: 10000;
-  transition: all 0.5s ease;
-  box-shadow: 5px 0 30px rgba(0, 0, 0, 0.15);
+
+  background: linear-gradient(180deg, #4f63a6 0%, #42579d 45%, #2d3d78 100%);
+
+  overflow-y: auto;
+
+  transition: 0.45s ease;
+
+  z-index: 99999;
+
+  box-shadow: 12px 0 45px rgba(0, 0, 0, 0.35);
 }
 
 .sidebar.active {
   left: 0;
 }
 
-/* =========================
-   Sidebar Header
-========================= */
+/* Orange Top Border */
+
+.sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 5px;
+
+  background: #e67d4b;
+}
+
+/*==================================================
+            HEADER
+==================================================*/
 
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px;
-  border-bottom: 1px solid #eee;
+
+  padding: 22px 20px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.sidebar-header img {
-  height: 45px;
+/*==================================================
+        COMPANY LOGO
+==================================================*/
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* =========================
-   Close Button
-========================= */
+.sidebar-brand img {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  padding: 5px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-brand h4 {
+  margin: 0;
+
+  color: #fff;
+
+  font-size: 20px;
+
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  letter-spacing: 0.4px;
+}
+
+.sidebar-brand p {
+  margin: 3px 0 0;
+
+  color: #ffb27b;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  letter-spacing: 1px;
+}
+
+/*==================================================
+            CLOSE BUTTON
+==================================================*/
 
 .close-btn {
+  width: 42px;
+  height: 42px;
+
   border: none;
-  background: transparent;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #fff;
+
   cursor: pointer;
-  padding: 5px;
+
+  transition: 0.4s;
+}
+
+.close-btn:hover {
+  background: #e67d4b;
+
+  transform: rotate(180deg) scale(1.05);
 }
 
 .close-icon {
-  font-size: 28px;
-  color: #4f63a6;
-  display: inline-block;
-  transition:
-    transform 1s ease,
-    color 0.3s ease;
+  font-size: 20px;
 }
 
-/* Hover on X icon */
-
-.close-icon:hover {
-  transform: rotate(360deg);
-  color: #e67d4b;
-}
-
-/* =========================
-   Sidebar Menu
-========================= */
+/*==================================================
+                MENU
+==================================================*/
 
 .sidebar-menu {
   list-style: none;
-  padding: 20px;
+
+  margin: 28px 0;
+
+  padding: 0 15px;
 }
 
 .sidebar-menu li {
@@ -298,41 +388,135 @@
 }
 
 .sidebar-menu a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  padding: 15px 18px;
+
   text-decoration: none;
-  color: #4f63a6;
-  padding: 14px 16px;
-  border-radius: 12px;
+
+  color: #fff;
+
+  font-size: 16px;
+
   font-weight: 600;
-  transition: 0.3s ease;
+
+  border-radius: 14px;
+
+  transition: 0.35s;
+
+  position: relative;
+
+  overflow: hidden;
 }
+
+/* Left Orange Border */
+
+.sidebar-menu a::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 0;
+
+  height: 100%;
+
+  background: #e67d4b;
+
+  transition: 0.35s;
+
+  z-index: -1;
+}
+
+/* Icons */
+
+.sidebar-menu .icon {
+  font-size: 20px;
+
+  min-width: 24px;
+}
+
+/* Hover */
 
 .sidebar-menu a:hover {
-  background: #4f63a6;
-  color: white;
-  transform: translateX(10px);
+  color: #fff;
+
+  transform: translateX(12px);
+
+  box-shadow: 0 10px 30px rgba(230, 125, 75, 0.35);
 }
 
-.sidebar-login {
-  background: #4f63a6;
-  color: white !important;
-  text-align: center;
+.sidebar-menu a:hover::before {
+  width: 100%;
 }
 
-.sidebar-login:hover {
-  background: #e67d4b !important;
+/* Active */
+
+.sidebar-menu a.active {
+  background: #fff;
+
+  color: #4f63a6;
+
+  font-weight: 700;
+
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.18);
 }
 
-/* =========================
-   Overlay
-========================= */
+.sidebar-menu a.active .icon {
+  color: #e67d4b;
+}
+
+/*==================================================
+            ADMIN LOGIN
+==================================================*/
+
+.login-item {
+  margin-top: 35px;
+}
+
+.login-item a {
+  justify-content: center;
+
+  background: #e67d4b;
+
+  color: #fff;
+
+  font-size: 17px;
+
+  font-weight: 700;
+
+  box-shadow: 0 15px 30px rgba(230, 125, 75, 0.35);
+}
+
+.login-item a:hover {
+  background: #fff;
+
+  color: #4f63a6;
+
+  transform: translateY(-3px);
+
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+}
+
+.login-item a:hover .icon {
+  color: #e67d4b;
+}
+
+/*==================================================
+            OVERLAY
+==================================================*/
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 9999;
-  animation: fadeIn 0.4s ease;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 99998;
+  animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
@@ -344,20 +528,99 @@
   }
 }
 
-/* =========================
-   Mobile
-========================= */
+/*==================================================
+            SCROLLBAR
+==================================================*/
 
-@media (max-width: 991px) {
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #e67d4b;
+  border-radius: 20px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/*==================================================
+            LARGE TABLETS
+==================================================*/
+
+@media (max-width: 1280px) {
+  .logo img {
+    width: 48px;
+  }
+
+  .logo h3 {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .desktop-menu {
+    gap: 8px;
+  }
+
+  .desktop-menu a {
+    font-size: 13px;
+  }
+
+  .login-btn {
+    padding: 8px 12px !important;
+    font-size: 13px;
+  }
+}
+/*==================================================
+            TABLETS
+==================================================*/
+
+@media (max-width: 1056px) {
   .desktop-menu {
     display: none;
   }
 
   .menu-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .logo img {
-    height: 45px;
+    width: 52px;
+  }
+
+  .logo h3 {
+    font-size: 17px;
+    padding: 8px 16px;
+  }
+
+  .sidebar {
+    width: 320px;
+    left: -340px;
+  }
+}
+
+/*==================================================
+            EXTRA SMALL
+==================================================*/
+
+@media (max-width: 360px) {
+  .logo img {
+    width: 42px;
+  }
+
+  .sidebar-brand h4 {
+    font-size: 16px;
+  }
+
+  .sidebar-brand p {
+    font-size: 11px;
+  }
+
+  .sidebar-menu a {
+    font-size: 14px;
+    padding: 13px;
   }
 }

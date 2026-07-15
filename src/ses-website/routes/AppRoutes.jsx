@@ -10,16 +10,18 @@ import Projects from "../pages/Projects";
 import Careers from "../pages/Careers";
 import Contact from "../pages/Contact";
 
+import Login from "../pages/Login";
+
 /* ================= Super Admin ================= */
 
-import SuperAdminLogin from "../pages/superadmin/SuperAdminLogin";
+// import SuperAdminLogin from "../pages/superadmin/SuperAdminLogin";
 import SuperAdminDashboard from "../pages/superadmin/SuperAdminDashboard";
 import CreateAdmin from "../pages/superadmin/CreateAdmin";
 import AdminList from "../pages/superadmin/AdminList";
 
 /* ================= Admin ================= */
 
-import AdminLogin from "../pages/admin/AdminLogin";
+// import AdminLogin from "../pages/admin/AdminLogin";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import UploadJobs from "../pages/admin/UploadJobs";
 import Applications from "../pages/admin/Applications";
@@ -46,7 +48,8 @@ function AppRoutes() {
 
       {/* ================= Super Admin ================= */}
 
-      <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+      {/* <Route path="/superadmin/login" element={<SuperAdminLogin />} /> */}
+      <Route path="/login" element={<Login />} />
 
       <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
@@ -63,7 +66,8 @@ function AppRoutes() {
 
       {/* ================= Admin ================= */}
 
-      <Route path="/admin/login" element={<AdminLogin />} />
+      {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+      <Route path="/login" element={<Login />} />
 
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
 

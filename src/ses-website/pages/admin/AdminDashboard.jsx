@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import {
   FaHome,
@@ -10,16 +11,32 @@ import {
 } from "react-icons/fa";
 
 import "../../asset/css/admin-dashboard.css";
+const API =
+  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
   const email = localStorage.getItem("adminEmail");
+  const [stats, setStats] = useState({
+    totalJobs: 0,
+    totalApplications: 0,
+  });
 
   useEffect(() => {
     if (!email) {
-      navigate("/admin/login", { replace: true });
+      navigate("/login");
+      return;
     }
+
+    axios
+      .get(`${API}/api/dashboard/stats`)
+      .then((res) => {
+        if (res.data.success) {
+          setStats(res.data.stats);
+        }
+      })
+      .catch(console.error);
   }, [email, navigate]);
 
   const logout = () => {
@@ -111,7 +128,7 @@ function AdminDashboard() {
         <div className="stat-card">
           <FaUpload className="stat-icon" />
 
-          <h2>0</h2>
+          <h2>{stats.totalJobs}</h2>
 
           <p>Total Job Uploads</p>
         </div>
@@ -119,7 +136,7 @@ function AdminDashboard() {
         <div className="stat-card">
           <FaClipboardList className="stat-icon" />
 
-          <h2>0</h2>
+          <h2>{stats.totalApplications}</h2>
 
           <p>Total Applications</p>
         </div>
