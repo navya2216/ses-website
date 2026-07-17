@@ -10,11 +10,8 @@ import {
   FaClipboardList,
   FaSignOutAlt,
 } from "react-icons/fa";
-import axios from "axios";
-
+import api from "../../api";
 import "../../asset/css/superadmin-dashboard.css";
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -32,8 +29,8 @@ function SuperAdminDashboard() {
       return;
     }
 
-    axios
-      .get(`${API}/api/dashboard/stats`)
+    api
+      .get("/api/dashboard/stats")
       .then((res) => {
         if (res.data.success) {
           setStats(res.data.stats);
@@ -97,7 +94,7 @@ function SuperAdminDashboard() {
           Upload Jobs
         </Link>
 
-        <Link to="/admin/applications" className="nav-btn">
+        <Link to="/superadmin/applications" className="nav-btn">
           <FaClipboardList />
           Applications
         </Link>

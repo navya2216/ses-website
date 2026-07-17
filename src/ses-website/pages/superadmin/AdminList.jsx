@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api";
 
 import SuperSidebar from "../../components/superadmin/SuperSidebar";
 import SuperHeader from "../../components/superadmin/SuperHeader";
 
 import "../../asset/css/admin-list.css";
-
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function AdminList() {
   const [admins, setAdmins] = useState([]);
@@ -30,7 +27,7 @@ function AdminList() {
 
   const loadAdmins = async () => {
     try {
-      const res = await axios.get(`${API}/api/admins`);
+      const res = await api.get("/api/admins");
       setAdmins(res.data.admins || []);
     } catch (err) {
       console.log(err);
@@ -50,7 +47,7 @@ function AdminList() {
 
   const updateAdmin = async () => {
     try {
-      await axios.put(`${API}/api/admins/${editing}`, form);
+      await api.put(`/api/admins/${editing}`, form);
 
       setEditing(null);
 
@@ -67,7 +64,7 @@ function AdminList() {
 
   const deleteAdmin = async () => {
     try {
-      await axios.delete(`${API}/api/admins/${deleteId}`);
+      await api.delete(`/api/admins/${deleteId}`);
 
       setShowDelete(false);
       setDeleteId(null);

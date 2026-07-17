@@ -44,18 +44,24 @@ function Login() {
       // ================= SUPER ADMIN =================
 
       if (res.data.role === "SUPER_ADMIN") {
+        localStorage.removeItem("adminEmail");
+        localStorage.removeItem("adminName");
+
+        localStorage.setItem("userRole", "SUPER_ADMIN");
+
         setShowOtp(true);
-
         setSuccess("OTP sent to your registered email.");
-
         return;
       }
 
       // ================= ADMIN =================
 
       if (res.data.role === "ADMIN") {
-        localStorage.setItem("adminEmail", res.data.admin.email);
+        localStorage.removeItem("superAdminEmail");
+        localStorage.removeItem("superAdminName");
 
+        localStorage.setItem("userRole", "ADMIN");
+        localStorage.setItem("adminEmail", res.data.admin.email);
         localStorage.setItem("adminName", res.data.admin.name);
 
         navigate("/admin/dashboard");
@@ -72,7 +78,6 @@ function Login() {
   const verifyOTP = async () => {
     if (!otp.trim()) {
       setError("Please enter OTP.");
-
       return;
     }
 
@@ -88,8 +93,11 @@ function Login() {
       });
 
       if (res.data.success) {
-        localStorage.setItem("superAdminEmail", res.data.superAdmin.email);
+        localStorage.removeItem("adminEmail");
+        localStorage.removeItem("adminName");
 
+        localStorage.setItem("userRole", "SUPER_ADMIN");
+        localStorage.setItem("superAdminEmail", res.data.superAdmin.email);
         localStorage.setItem("superAdminName", res.data.superAdmin.name);
 
         navigate("/superadmin/dashboard");

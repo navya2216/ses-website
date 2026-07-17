@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import api from "../api";
 import {
   FaEnvelope,
   FaMapMarkerAlt,
@@ -9,6 +10,58 @@ import {
 import "../asset/css/contact.css";
 
 function Contact() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    company: "",
+    phone: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setSuccess("");
+    setError("");
+
+    if (!form.name || !form.email || !form.message) {
+      setError("Please fill all required fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await api.post("/api/contact", form);
+
+      if (res.data.success) {
+        setSuccess(res.data.message);
+
+        setForm({
+          name: "",
+          email: "",
+          company: "",
+          phone: "",
+          message: "",
+        });
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send message.");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <section className="page-hero">
@@ -65,24 +118,55 @@ function Contact() {
             <div className="contact-form-box">
               <h2>Send Message</h2>
 
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="form-grid">
-                  <input type="text" placeholder="Full Name *" />
-
-                  <input type="email" placeholder="Email Address *" />
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Full Name *"
+                    value={form.name}
+                    onChange={handleChange}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address *"
+                    value={form.email}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div className="form-grid">
-                  <input type="text" placeholder="Company" />
+                  <input
+                    type="text"
+                    name="company"
+                    placeholder="Company"
+                    value={form.company}
+                    onChange={handleChange}
+                  />
 
-                  <input type="text" placeholder="Phone Number" />
+                  <input
+                    type="text"
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={form.phone}
+                    onChange={handleChange}
+                  />
                 </div>
 
-                <textarea rows="6" placeholder="Message *"></textarea>
+                <textarea
+                  name="message"
+                  rows="6"
+                  placeholder="Message *"
+                  value={form.message}
+                  onChange={handleChange}
+                ></textarea>
 
-                <button type="submit">
+                {success && <div className="success-message">{success}</div>}
+                {error && <div className="error-message">{error}</div>}
+                <button type="submit" disabled={loading}>
                   <FaPaperPlane />
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>

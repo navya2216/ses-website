@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import api from "../../api";
 import "../../asset/css/ApplyForm.css";
 
 function ApplyForm() {
@@ -7,19 +7,19 @@ function ApplyForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [jobIds, setJobIds] = useState([]);
-  const [resume, setResume] = useState(null);
-
   const [experienceType, setExperienceType] = useState("");
   const [currentSalary, setCurrentSalary] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
 
-  const [errors, setErrors] = useState({});
+  const [jobIds, setJobIds] = useState([]);
   const [roleOptions, setRoleOptions] = useState([]);
 
+  const [resume, setResume] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const fileRef = useRef();
 
@@ -27,31 +27,24 @@ function ApplyForm() {
 
   const fetchRoles = async () => {
     try {
-      const res = await axios.get("http://localhost:4006/api/roles");
+      const res = await api.get("/api/roles");
 
       if (res.data.success) {
         setRoleOptions(res.data.roles);
       }
     } catch (err) {
       console.log(err);
-      setApiError("Failed to load roles");
+      setApiError("Unable to load roles.");
     }
   };
-
-  /* ================= LOAD + AUTO REFRESH ROLES ================= */
 
   useEffect(() => {
     fetchRoles();
 
-    // Auto refresh roles every 10 seconds
-    const interval = setInterval(() => {
-      fetchRoles();
-    }, 10000);
+    const timer = setInterval(fetchRoles, 10000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
-
-  /* ================= AUTO HIDE MESSAGES ================= */
 
   useEffect(() => {
     if (apiError || successMsg) {
@@ -64,57 +57,52 @@ function ApplyForm() {
     }
   }, [apiError, successMsg]);
 
-  // /* ================= TOGGLE ROLE ================= */
-
-  // const toggleRole = (item) => {
-  //   if (role.includes(item)) {
-  //     setRole(role.filter((r) => r !== item));
-  //   } else {
-  //     setRole([...role, item]);
-  //   }
-
-  //   setErrors((prev) => ({ ...prev, role: "" }));
-  //   setApiError("");
-  // };
-
-  /* ================= VALIDATION ================= */
+  /* ================= VALIDATE ================= */
 
   const validate = () => {
     let temp = {};
 
-    if (!name.trim()) temp.name = "Name is required";
+    if (!name.trim()) {
+      temp.name = "Full name is required";
+    }
 
     if (!email.trim()) {
       temp.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      temp.email = "Invalid email format";
+      temp.email = "Invalid email";
     }
 
     if (!phone.trim()) {
-      temp.phone = "Phone is required";
-    } else if (!/^[0-9]{10}$/.test(phone)) {
-      temp.phone = "Phone must be 10 digits";
+      temp.phone = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(phone)) {
+      temp.phone = "Enter valid mobile number";
     }
+
     if (jobIds.length === 0) {
-      temp.role = "Please select at least one role";
+      temp.role = "Select at least one role";
     }
+
+    if (!experienceType) {
+      temp.experienceType = "Select experience";
+    }
+
+    if (experienceType === "Experienced") {
+      if (!currentSalary) {
+        temp.currentSalary = "Current salary required";
+      }
+    }
+
+    if (!expectedSalary) {
+      temp.expectedSalary = "Expected salary required";
+    }
+
     if (!resume) {
-      temp.resume = "Resume is required";
+      temp.resume = "Resume required";
     } else if (resume.type !== "application/pdf") {
-      temp.resume = "Only PDF file allowed";
+      temp.resume = "Only PDF allowed";
     }
 
     setErrors(temp);
-
-    if (!experienceType) temp.experienceType = "Select Experience Type";
-
-    if (experienceType === "Experienced") {
-      if (!currentSalary.trim())
-        temp.currentSalary = "Current salary is required";
-    }
-
-    if (!expectedSalary.trim())
-      temp.expectedSalary = "Expected salary is required";
 
     return Object.keys(temp).length === 0;
   };
@@ -122,72 +110,71 @@ function ApplyForm() {
   /* ================= SUBMIT ================= */
 
   const submitApplication = async () => {
+    if (!validate()) return;
+
+    setLoading(true);
     setApiError("");
     setSuccessMsg("");
 
-    if (!validate()) return;
-
-    const formData = new FormData();
-
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("phone", phone);
-    formData.append("job_ids", JSON.stringify(jobIds));
-    formData.append("experience_type", experienceType);
-    formData.append("current_salary", currentSalary);
-    formData.append("expected_salary", expectedSalary);
-
-    formData.append("resume", resume);
-
     try {
-      setLoading(true);
+      const formData = new FormData();
 
-      const res = await axios.post(
-        "http://localhost:4006/api/apply",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("job_ids", JSON.stringify(jobIds));
+      formData.append("experience_type", experienceType);
+      formData.append("current_salary", currentSalary);
+      formData.append("expected_salary", expectedSalary);
+      formData.append("resume", resume);
+
+      const res = await api.post("/api/apply", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
       if (res.data.success) {
-        setSuccessMsg("Application submitted ✔ Resume sent to HR email");
+        setSuccessMsg(res.data.message);
 
         setName("");
         setEmail("");
         setPhone("");
-        setJobIds([]); // <-- Fix here
+
         setExperienceType("");
         setCurrentSalary("");
         setExpectedSalary("");
+
         setResume(null);
-        setErrors({});
-        setErrors({});
-        // ⭐ IMPORTANT FIX
+        setJobIds([]);
+
         if (fileRef.current) {
           fileRef.current.value = "";
         }
+
+        setErrors({});
       } else {
         setApiError(res.data.message);
       }
     } catch (err) {
       console.log(err);
 
-      setApiError(err.response?.data?.message || "Server error");
-    } finally {
-      setLoading(false);
+      setApiError(err.response?.data?.message || "Application failed.");
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="apply-form container">
-      <h2 className="text-center mb-4">Apply for a Position</h2>
-      {/* ERROR / SUCCESS */}
+      <h2>Apply for a Position</h2>
+
       {apiError && <div className="error-message">{apiError}</div>}
+
       {successMsg && <div className="success-message">{successMsg}</div>}
-      {/* NAME */}
+
+      {/* Name */}
+
       <div className="input-group">
         <input
           type="text"
@@ -195,19 +182,15 @@ function ApplyForm() {
           value={name}
           onChange={(e) => {
             setName(e.target.value);
-
-            setErrors((prev) => ({
-              ...prev,
-              name: "",
-            }));
-
-            setApiError("");
+            setErrors({ ...errors, name: "" });
           }}
         />
 
-        {errors.name && <small className="text-danger">{errors.name}</small>}
+        {errors.name && <small>{errors.name}</small>}
       </div>
-      {/* EMAIL */}
+
+      {/* Email */}
+
       <div className="input-group">
         <input
           type="email"
@@ -215,98 +198,86 @@ function ApplyForm() {
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
-
-            setErrors((prev) => ({
-              ...prev,
-              email: "",
-            }));
-
-            setApiError("");
+            setErrors({ ...errors, email: "" });
           }}
         />
 
-        {errors.email && <small className="text-danger">{errors.email}</small>}
+        {errors.email && <small>{errors.email}</small>}
       </div>
-      {/* PHONE */}
+
+      {/* Phone */}
+
       <div className="input-group">
         <input
-          type="tel"
+          type="text"
+          maxLength={10}
           placeholder="Phone Number"
           value={phone}
           onChange={(e) => {
-            setPhone(e.target.value);
-
-            setErrors((prev) => ({
-              ...prev,
-              phone: "",
-            }));
-
-            setApiError("");
+            const value = e.target.value.replace(/\D/g, "");
+            setPhone(value);
+            setErrors({ ...errors, phone: "" });
           }}
         />
 
-        {errors.phone && <small className="text-danger">{errors.phone}</small>}
+        {errors.phone && <small>{errors.phone}</small>}
       </div>
-      {/* Experience Section */}
+      {/* Experience */}
+
       <div className="input-group">
         <label>Experience</label>
 
         <select
-          className="form-select"
           value={experienceType}
           onChange={(e) => {
             setExperienceType(e.target.value);
-            setErrors((prev) => ({
-              ...prev,
-              experienceType: "",
-            }));
+            setErrors({ ...errors, experienceType: "" });
           }}
         >
-          <option value="">Select</option>
+          <option value="">Select Experience</option>
           <option value="Fresher">Fresher</option>
           <option value="Experienced">Experienced</option>
         </select>
 
-        {errors.experienceType && (
-          <small className="text-danger">{errors.experienceType}</small>
-        )}
+        {errors.experienceType && <small>{errors.experienceType}</small>}
       </div>
-      {/* Salary Fields */}
-      <div className="salary-row">
-        {experienceType === "Experienced" && (
-          <div className="input-group">
-            <label>Current Salary</label>
 
-            <input
-              type="number"
-              placeholder="Current Salary"
-              value={currentSalary}
-              onChange={(e) => setCurrentSalary(e.target.value)}
-            />
+      {/* Current Salary */}
 
-            {errors.currentSalary && (
-              <small className="text-danger">{errors.currentSalary}</small>
-            )}
-          </div>
-        )}
-
+      {experienceType === "Experienced" && (
         <div className="input-group">
-          <label>Expected Salary</label>
-
           <input
             type="number"
-            placeholder="Expected Salary"
-            value={expectedSalary}
-            onChange={(e) => setExpectedSalary(e.target.value)}
+            placeholder="Current Salary"
+            value={currentSalary}
+            onChange={(e) => {
+              setCurrentSalary(e.target.value);
+              setErrors({ ...errors, currentSalary: "" });
+            }}
           />
 
-          {errors.expectedSalary && (
-            <small className="text-danger">{errors.expectedSalary}</small>
-          )}
+          {errors.currentSalary && <small>{errors.currentSalary}</small>}
         </div>
+      )}
+
+      {/* Expected Salary */}
+
+      <div className="input-group">
+        <input
+          type="number"
+          placeholder="Expected Salary"
+          value={expectedSalary}
+          onChange={(e) => {
+            setExpectedSalary(e.target.value);
+            setErrors({ ...errors, expectedSalary: "" });
+          }}
+        />
+
+        {errors.expectedSalary && <small>{errors.expectedSalary}</small>}
       </div>
-      {/* ROLE SECTION */}
-      {/* ROLE SECTION */}
+
+      {/* Roles */}
+
       <div className="input-group">
         <label>Select Roles</label>
 
@@ -315,7 +286,7 @@ function ApplyForm() {
             const role = roleOptions.find((r) => String(r.id) === String(id));
 
             return (
-              <span key={id} className="role-chip">
+              <span className="role-chip" key={id}>
                 {role?.role}
 
                 <span
@@ -324,14 +295,13 @@ function ApplyForm() {
                     setJobIds(jobIds.filter((item) => item !== id))
                   }
                 >
-                  ❌
+                  ✕
                 </span>
               </span>
             );
           })}
 
           <select
-            className="role-dropdown"
             value=""
             onChange={(e) => {
               const value = e.target.value;
@@ -340,12 +310,10 @@ function ApplyForm() {
                 setJobIds([...jobIds, value]);
               }
 
-              setErrors((prev) => ({
-                ...prev,
+              setErrors({
+                ...errors,
                 role: "",
-              }));
-
-              setApiError("");
+              });
 
               e.target.value = "";
             }}
@@ -360,15 +328,17 @@ function ApplyForm() {
           </select>
         </div>
 
-        {errors.role && <small className="text-danger">{errors.role}</small>}
-      </div>{" "}
-      {/* RESUME */}
-      <div className="upload-box">
-        <label>Upload Resume (PDF only)</label>
+        {errors.role && <small>{errors.role}</small>}
+      </div>
+
+      {/* Resume */}
+
+      <div className="input-group">
+        <label>Resume (PDF)</label>
 
         <input
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf"
           ref={fileRef}
           onChange={(e) => {
             const file = e.target.files[0];
@@ -376,30 +346,29 @@ function ApplyForm() {
             if (!file) return;
 
             if (file.type !== "application/pdf") {
-              alert("Only PDF files are allowed");
+              alert("Only PDF allowed");
               e.target.value = "";
-              setResume(null);
               return;
             }
 
             setResume(file);
-            setErrors((prev) => ({
-              ...prev,
+
+            setErrors({
+              ...errors,
               resume: "",
-            }));
-            setApiError("");
+            });
           }}
         />
 
-        {errors.resume && (
-          <small className="text-danger">{errors.resume}</small>
-        )}
+        {errors.resume && <small>{errors.resume}</small>}
       </div>
-      {/* SUBMIT */}
+
+      {/* Submit */}
+
       <button
         className="submit-btn"
-        onClick={submitApplication}
         disabled={loading}
+        onClick={submitApplication}
       >
         {loading ? "Submitting..." : "Submit Application"}
       </button>

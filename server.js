@@ -49,7 +49,6 @@ const PORT = process.env.PORT || 4006;
 /* ================= MEMORY ================= */
 const otpStore = new Map();
 const loginUsers = new Map();
-
 /* ================= EMAIL ================= */
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -59,6 +58,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ADD THIS BELOW createTransport
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("Transport Error:", err);
+  } else {
+    console.log("✅ Mail Server Ready");
+  }
+});
 /* ================= HELPERS ================= */
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -727,65 +734,25 @@ ORDER BY id DESC
   }
 });
 
+/* ================= APPLY JOB ================= */
+
 app.post("/api/apply", upload.single("resume"), async (req, res) => {
   const connection = await db.promise().getConnection();
 
   try {
     const {
-      job_ids,
       name,
       email,
       phone,
+      job_ids,
       experience_type,
       current_salary,
       expected_salary,
     } = req.body;
 
-    const applicantEmail = email?.trim().toLowerCase();
+    const applicantEmail = email.trim().toLowerCase();
 
-    let selectedJobs = [];
-
-    try {
-      selectedJobs = JSON.parse(job_ids || "[]");
-    } catch (err) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid job selection.",
-      });
-    }
-
-    const resumePath = req.file?.path;
-
-    const deleteResume = () => {
-      try {
-        if (resumePath && fs.existsSync(resumePath)) {
-          fs.unlinkSync(resumePath);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    /* ================= REQUIRED FIELDS ================= */
-
-    if (
-      !Array.isArray(selectedJobs) ||
-      selectedJobs.length === 0 ||
-      !name ||
-      !applicantEmail ||
-      !phone ||
-      !experience_type ||
-      !expected_salary
-    ) {
-      deleteResume();
-
-      return res.status(400).json({
-        success: false,
-        message: "Please fill all required fields.",
-      });
-    }
-
-    /* ================= RESUME VALIDATION ================= */
+    /* ---------------- Resume ---------------- */
 
     if (!req.file) {
       return res.status(400).json({
@@ -794,186 +761,469 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
       });
     }
 
-    if (req.file.mimetype !== "application/pdf") {
-      deleteResume();
+    const resumePath = req.file.path;
+
+    /* ---------------- Parse Roles ---------------- */
+
+    let selectedJobIds = [];
+
+    try {
+      selectedJobIds = JSON.parse(job_ids);
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid roles.",
+      });
+    }
+
+    if (!selectedJobIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one role.",
+      });
+    }
+
+    /* ---------------- Duplicate Check ---------------- */
+
+    const [duplicate] = await connection.query(
+      `
+      SELECT id
+      FROM applications
+      WHERE LOWER(applicant_email)=LOWER(?)
+         OR applicant_phone=?
+      `,
+      [applicantEmail, phone],
+    );
+
+    if (duplicate.length > 0) {
+      fs.unlinkSync(resumePath);
 
       return res.status(400).json({
         success: false,
-        message: "Only PDF resumes are allowed.",
+        message:
+          "You have already submitted an application using this Email or Phone Number.",
       });
     }
 
-    /* ================= FETCH JOBS ================= */
+    /* ---------------- Fetch Jobs ---------------- */
 
     const [jobs] = await connection.query(
-      `SELECT * FROM career_jobs WHERE id IN (?)`,
-      [selectedJobs],
+      `
+      SELECT id,
+             job_role,
+             target_email
+      FROM career_jobs
+      WHERE id IN (?)
+      `,
+      [selectedJobIds],
     );
 
-    const selectedRoles = jobs.map((job) => job.job_role).join(", ");
-
-    if (jobs.length !== selectedJobs.length) {
-      deleteResume();
+    if (jobs.length === 0) {
+      fs.unlinkSync(resumePath);
 
       return res.status(404).json({
         success: false,
-        message: "One or more selected jobs were not found.",
+        message: "Selected roles not found.",
       });
     }
 
-    /* ================= VALIDATE & INSERT ================= */
+    const selectedRoles = jobs.map((x) => x.job_role).join(", ");
 
-    for (const job of jobs) {
-      /* ================= DUPLICATE APPLICATION CHECK ================= */
+    const firstJobId = jobs[0].id;
 
-      const [alreadyApplied] = await connection.query(
-        `SELECT status
-         FROM applications
-         WHERE job_id = ?
-         AND LOWER(applicant_email) = LOWER(?)`,
-        [job.id, applicantEmail],
-      );
+    /* ---------------- Save Application ---------------- */
 
-      if (alreadyApplied.length > 0) {
-        deleteResume();
+    await connection.query(
+      `
+      INSERT INTO applications
+      (
+        job_id,
+        selected_roles,
+        applicant_name,
+        applicant_email,
+        applicant_phone,
+        experience_type,
+        current_salary,
+        expected_salary,
+        resume_path
+      )
+      VALUES (?,?,?,?,?,?,?,?,?)
+      `,
+      [
+        firstJobId,
+        selectedRoles,
+        name,
+        applicantEmail,
+        phone,
+        experience_type,
+        experience_type === "Experienced" ? current_salary : null,
+        expected_salary,
+        resumePath,
+      ],
+    );
 
-        let message;
+    /* ---------------- Target Emails ---------------- */
 
-        switch (alreadyApplied[0].status) {
-          case "Pending":
-            message = `You have already applied for "${job.job_role}". Your application is currently Pending.`;
-            break;
+    const targetEmails = [
+      ...new Set(jobs.map((job) => job.target_email).filter(Boolean)),
+    ];
 
-          case "Shortlisted":
-            message = `You have already applied for "${job.job_role}". Your application has been Shortlisted.`;
-            break;
+    /* ---------------- Mail Body ---------------- */
 
-          case "Rejected":
-            message = `You have already applied for "${job.job_role}". Your application was Rejected. You cannot apply again.`;
-            break;
+    const html = `
+      <h2>New Career Application</h2>
 
-          case "Selected":
-            message = `You have already applied for "${job.job_role}". Your application has been Selected.`;
-            break;
+      <table border="1" cellpadding="8" cellspacing="0">
 
-          default:
-            message = `You have already applied for "${job.job_role}".`;
-        }
+      <tr>
+      <td><b>Name</b></td>
+      <td>${name}</td>
+      </tr>
 
-        return res.status(400).json({
-          success: false,
-          message,
-        });
-      }
+      <tr>
+      <td><b>Email</b></td>
+      <td>${applicantEmail}</td>
+      </tr>
 
-      /* ================= MAXIMUM 20 APPLICATIONS ================= */
+      <tr>
+      <td><b>Phone</b></td>
+      <td>${phone}</td>
+      </tr>
 
-      const [count] = await connection.query(
-        `SELECT COUNT(*) AS total
-         FROM applications
-         WHERE job_id = ?`,
-        [job.id],
-      );
+      <tr>
+      <td><b>Roles</b></td>
+      <td>${selectedRoles}</td>
+      </tr>
 
-      if (count[0].total >= 20) {
-        deleteResume();
+      <tr>
+      <td><b>Experience</b></td>
+      <td>${experience_type}</td>
+      </tr>
 
-        return res.status(400).json({
-          success: false,
-          message: `"${job.job_role}" already received 20 applications.`,
-        });
-      }
+      <tr>
+      <td><b>Current Salary</b></td>
+      <td>${experience_type === "Experienced" ? current_salary : "-"}</td>
+      </tr>
 
-      /* ================= SAVE APPLICATION ================= */
-      const selectedRoles = jobs.map((job) => job.job_role).join(", ");
-      const firstJobId = jobs[0].id;
+      <tr>
+      <td><b>Expected Salary</b></td>
+      <td>${expected_salary}</td>
+      </tr>
 
-      await connection.query(
-        `INSERT INTO applications
-  (
-    job_id,
-    selected_roles,
-    applicant_name,
-    applicant_email,
-    applicant_phone,
-    experience_type,
-    current_salary,
-    expected_salary,
-    resume_path,
-    status
-  )
-  VALUES (?,?,?,?,?,?,?,?,?,?)`,
-        [
-          firstJobId,
-          selectedRoles,
-          name,
-          applicantEmail,
-          phone,
-          experience_type,
-          experience_type === "Experienced" ? current_salary : null,
-          expected_salary,
-          resumePath,
-          "Pending",
-        ],
-      );
-    }
+      </table>
+    `;
 
-    // ================= SEND SINGLE EMAIL =================
+    /* ---------------- Send Mail ---------------- */
 
-    // Remove duplicate HR email addresses
-    const uniqueEmails = [...new Set(jobs.map((job) => job.target_email))];
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: targetEmails.join(","),
+      subject: `New Application - ${name}`,
+      html,
+      attachments: [
+        {
+          filename: req.file.originalname,
+          path: resumePath,
+        },
+      ],
+    });
 
-    let mailText =
-      `Selected Job Roles : ${selectedRoles}\n\n` +
-      `Applicant Name : ${name}\n` +
-      `Email : ${applicantEmail}\n` +
-      `Phone : ${phone}\n` +
-      `Experience : ${experience_type}\n`;
+    /* ---------------- Delete Resume ---------------- */
 
-    if (experience_type === "Experienced") {
-      mailText += `Current Salary : ${current_salary}\n`;
-    }
-
-    mailText += `Expected Salary : ${expected_salary}`;
-
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: uniqueEmails.join(","), // Send one email to all unique recipients
-        subject: `New Application - ${name}`,
-        text: mailText,
-        attachments: [
-          {
-            filename: req.file.originalname,
-            path: resumePath,
-          },
-        ],
-      });
-    } catch (mailErr) {
-      console.log("Mail Error:", mailErr);
-    }
-
-    deleteResume();
+    fs.unlinkSync(resumePath);
 
     return res.json({
       success: true,
       message: "Application submitted successfully.",
     });
   } catch (err) {
-    console.log("Apply Error:", err);
+    console.log(err);
 
-    if (req.file?.path && fs.existsSync(req.file.path)) {
+    if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
     return res.status(500).json({
       success: false,
-      message: "Server error.",
+      message: "Server Error.",
     });
   } finally {
     connection.release();
   }
 });
+// app.post("/api/apply", upload.single("resume"), async (req, res) => {
+//   const connection = await db.promise().getConnection();
+
+//   try {
+//     const {
+//       job_ids,
+//       name,
+//       email,
+//       phone,
+//       experience_type,
+//       current_salary,
+//       expected_salary,
+//     } = req.body;
+
+//     const applicantEmail = email?.trim().toLowerCase();
+
+//     let selectedJobs = [];
+
+//     try {
+//       selectedJobs = JSON.parse(job_ids || "[]");
+//     } catch (err) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid job selection.",
+//       });
+//     }
+
+//     const resumePath = req.file?.path;
+
+//     const deleteResume = () => {
+//       try {
+//         if (resumePath && fs.existsSync(resumePath)) {
+//           fs.unlinkSync(resumePath);
+//         }
+//       } catch (err) {
+//         console.log(err);
+//       }
+//     };
+
+//     /* ================= REQUIRED FIELDS ================= */
+
+//     if (
+//       !Array.isArray(selectedJobs) ||
+//       selectedJobs.length === 0 ||
+//       !name ||
+//       !applicantEmail ||
+//       !phone ||
+//       !experience_type ||
+//       !expected_salary
+//     ) {
+//       deleteResume();
+
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please fill all required fields.",
+//       });
+//     }
+//     /* ================= RESUME VALIDATION ================= */
+
+//     if (!req.file) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Resume is required.",
+//       });
+//     }
+
+//     if (req.file.mimetype !== "application/pdf") {
+//       deleteResume();
+
+//       return res.status(400).json({
+//         success: false,
+//         message: "Only PDF resumes are allowed.",
+//       });
+//     }
+
+//     /* ================= DUPLICATE EMAIL / PHONE CHECK ================= */
+//     // ADD THE BELOW CODE HERE
+
+//     const [duplicate] = await connection.query(
+//       `SELECT id
+//    FROM applications
+//    WHERE LOWER(applicant_email) = LOWER(?)
+//       OR applicant_phone = ?`,
+//       [applicantEmail, phone],
+//     );
+
+//     if (duplicate.length > 0) {
+//       deleteResume();
+
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "An application with this email address or phone number already exists. You cannot apply again.",
+//       });
+//     }
+
+//     /* ================= FETCH JOBS ================= */
+
+//     const [jobs] = await connection.query(
+//       `SELECT * FROM career_jobs WHERE id IN (?)`,
+//       [selectedJobs],
+//     );
+
+//     const selectedRoles = jobs.map((job) => job.job_role).join(", ");
+
+//     if (jobs.length !== selectedJobs.length) {
+//       deleteResume();
+
+//       return res.status(404).json({
+//         success: false,
+//         message: "One or more selected jobs were not found.",
+//       });
+//     }
+
+//     /* ================= VALIDATE & INSERT ================= */
+
+//     /* ================= CHECK EACH SELECTED JOB ================= */
+
+//     for (const job of jobs) {
+//       // Already applied?
+//       const [alreadyApplied] = await connection.query(
+//         `SELECT status
+//      FROM applications
+//      WHERE job_id=? AND LOWER(applicant_email)=LOWER(?)`,
+//         [job.id, applicantEmail],
+//       );
+
+//       if (alreadyApplied.length > 0) {
+//         deleteResume();
+
+//         return res.status(400).json({
+//           success: false,
+//           message: `You have already applied for "${job.job_role}".`,
+//         });
+//       }
+
+//       // Maximum 20 applications
+//       const [count] = await connection.query(
+//         `SELECT COUNT(*) AS total
+//      FROM applications
+//      WHERE job_id=?`,
+//         [job.id],
+//       );
+
+//       if (count[0].total >= 20) {
+//         deleteResume();
+
+//         return res.status(400).json({
+//           success: false,
+//           message: `"${job.job_role}" already received 20 applications.`,
+//         });
+//       }
+//     }
+
+//     /* ================= SAVE SINGLE APPLICATION ================= */
+
+//     const firstJobId = jobs[0].id;
+//     await connection.query(
+//       `INSERT INTO applications
+// (
+// job_id,
+// selected_roles,
+// applicant_name,
+// applicant_email,
+// applicant_phone,
+// experience_type,
+// current_salary,
+// expected_salary,
+// resume_path,
+// status
+// )
+// VALUES (?,?,?,?,?,?,?,?,?,?)`,
+//       [
+//         firstJobId,
+//         selectedRoles,
+//         name,
+//         applicantEmail,
+//         phone,
+//         experience_type,
+//         experience_type === "Experienced" ? current_salary : null,
+//         expected_salary,
+//         null,
+//         "Pending",
+//       ],
+//     );
+
+//     // ================= SEND SINGLE EMAIL =================// ================= SEND SINGLE EMAIL =================
+
+//     const uniqueEmails = [
+//       ...new Set(
+//         jobs.map((job) => job.target_email?.trim()).filter((email) => email),
+//       ),
+//     ];
+//     console.log(uniqueEmails);
+
+//     console.log("========== MAIL DEBUG ==========");
+//     console.log("Target Emails:", uniqueEmails);
+//     console.log("Resume Path:", resumePath);
+//     console.log("Resume Exists:", fs.existsSync(resumePath));
+//     console.log("Selected Roles:", selectedRoles);
+//     console.log("===============================");
+
+//     let mailText =
+//       `Selected Job Roles : ${selectedRoles}\n\n` +
+//       `Applicant Name : ${name}\n` +
+//       `Email : ${applicantEmail}\n` +
+//       `Phone : ${phone}\n` +
+//       `Experience : ${experience_type}\n`;
+
+//     if (experience_type === "Experienced") {
+//       mailText += `Current Salary : ${current_salary}\n`;
+//     }
+
+//     mailText += `Expected Salary : ${expected_salary}`;
+
+//     try {
+//       console.log("Sending mail to:", uniqueEmails.join(","));
+//       console.log("Resume Path:", resumePath);
+//       console.log("Resume Exists:", fs.existsSync(resumePath));
+
+//       const info = await transporter.sendMail({
+//         from: process.env.EMAIL_USER,
+//         to: uniqueEmails.join(","),
+//         subject: `New Job Application - ${name}`,
+//         text: mailText,
+//         attachments: [
+//           {
+//             filename: req.file.originalname,
+//             path: resumePath,
+//           },
+//         ],
+//       });
+
+//       console.log("Mail Sent Successfully");
+//       console.log(info.response);
+
+//       deleteResume();
+
+//       return res.json({
+//         success: true,
+//         message: "Application submitted successfully.",
+//       });
+//     } catch (mailErr) {
+//       console.error("========== MAIL ERROR ==========");
+//       console.error(mailErr);
+//       console.error("Message:", mailErr.message);
+//       console.error("Stack:", mailErr.stack);
+//       console.error("===============================");
+
+//       deleteResume();
+
+//       return res.status(500).json({
+//         success: false,
+//         message: "Application saved, but email could not be sent.",
+//         error: mailErr.message,
+//         stack: mailErr.stack,
+//       });
+//     }
+//   } catch (err) {
+//     console.log("Apply Error:", err);
+
+//     if (req.file?.path && fs.existsSync(req.file.path)) {
+//       fs.unlinkSync(req.file.path);
+//     }
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error.",
+//     });
+//   } finally {
+//     connection.release();
+//   }
+// });
 
 /* ================= ROLES ================= */
 app.get("/api/roles", (req, res) => {
@@ -1177,6 +1427,70 @@ app.get("/api/dashboard/stats", (req, res) => {
       },
     );
   });
+});
+/* ================= CONTACT US ================= */
+
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, company, phone, message } = req.body;
+
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, Email and Message are required.",
+      });
+    }
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      // to: "softelectronicsolutions@gmail.com", // Change if required
+      to: "navyabodasu24@gmail.com", // Change if required
+
+      subject: `Website Contact - ${name}`,
+      html: `
+        <h2>New Contact Message</h2>
+
+        <table cellpadding="8">
+          <tr>
+            <td><strong>Name</strong></td>
+            <td>${name}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Email</strong></td>
+            <td>${email}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Company</strong></td>
+            <td>${company || "-"}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Phone</strong></td>
+            <td>${phone || "-"}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Message</strong></td>
+            <td>${message}</td>
+          </tr>
+        </table>
+      `,
+    });
+
+    res.json({
+      success: true,
+      message: "Message sent successfully.",
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to send message.",
+    });
+  }
 });
 /* ================= WEBSOCKET ================= */
 

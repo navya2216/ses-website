@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api";
 
 import {
   FaHome,
@@ -11,8 +11,6 @@ import {
 } from "react-icons/fa";
 
 import "../../asset/css/admin-dashboard.css";
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -29,8 +27,8 @@ function AdminDashboard() {
       return;
     }
 
-    axios
-      .get(`${API}/api/dashboard/stats`)
+    api
+      .get("/api/dashboard/stats")
       .then((res) => {
         if (res.data.success) {
           setStats(res.data.stats);

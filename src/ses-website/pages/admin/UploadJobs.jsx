@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaFileExcel, FaUpload, FaTimes } from "react-icons/fa";
-import axios from "axios";
+import api from "../../api";
 import "../../asset/css/upload-jobs.css";
 
 function UploadJobs() {
@@ -41,26 +41,18 @@ function UploadJobs() {
     }
 
     const formData = new FormData();
-
     formData.append("file", selectedFile);
 
     try {
       setUploading(true);
 
-      const res = await axios.post(
-        "http://localhost:4006/api/upload-jobs",
-
-        formData,
-
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      const res = await api.post("/api/upload-jobs", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
       alert(res.data.message);
-
       setSelectedFile(null);
     } catch (err) {
       if (err.response) {

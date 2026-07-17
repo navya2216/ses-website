@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
-
+import api from "../../api";
 import SuperSidebar from "../../components/superadmin/SuperSidebar";
 import SuperHeader from "../../components/superadmin/SuperHeader";
 
 import "../../asset/css/create-admin.css";
-
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function CreateAdmin() {
   const [form, setForm] = useState({
@@ -40,11 +36,10 @@ function CreateAdmin() {
     try {
       const superAdminEmail = localStorage.getItem("superAdminEmail");
 
-      const res = await axios.post(`${API}/api/createadmin`, {
+      const res = await api.post("/api/createadmin", {
         superAdminEmail,
         ...form,
       });
-
       if (res.data.success) {
         setMessage("Admin created successfully.");
         setForm({

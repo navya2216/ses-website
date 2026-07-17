@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api";
 import { useNavigate } from "react-router-dom";
 import { FaTrash, FaArrowLeft } from "react-icons/fa";
 
 import "../../asset/css/applications.css";
-
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
 
 function Applications() {
   const navigate = useNavigate();
@@ -30,7 +27,7 @@ function Applications() {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${API}/api/applications`);
+      const res = await api.get("/api/applications");
 
       if (res.data.success) {
         setApplications(res.data.applications);
@@ -46,7 +43,7 @@ function Applications() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`${API}/api/applications/${id}`, {
+      await api.put(`/api/applications/${id}`, {
         status,
       });
 
@@ -64,7 +61,7 @@ function Applications() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${API}/api/applications/${id}`);
+      await api.delete(`/api/applications/${id}`);
 
       alert("Application deleted successfully.");
 
@@ -80,7 +77,9 @@ function Applications() {
         <button
           className="back-btn"
           onClick={() => {
-            if (localStorage.getItem("superAdminEmail")) {
+            const role = localStorage.getItem("userRole");
+
+            if (role === "SUPER_ADMIN") {
               navigate("/superadmin/dashboard");
             } else {
               navigate("/admin/dashboard");
