@@ -16,11 +16,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:4007"],
+    origin: ["http://localhost:4007", "http://192.168.88.2:4007"],
     credentials: true,
   }),
 );
-
 app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
@@ -827,28 +826,80 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
       });
     }
 
-    const selectedRoles = jobs.map((x) => x.job_role).join(", ");
+    // const selectedRoles = jobs.map((x) => x.job_role).join(", ");
+
+    // const firstJobId = jobs[0].id;
+
+    // /* ---------------- Save Application ---------------- */
+
+    // await connection.query(
+    //   `
+    //   INSERT INTO applications
+    //   (
+    //     job_id,
+    //     selected_roles,
+    //     applicant_name,
+    //     applicant_email,
+    //     applicant_phone,
+    //     experience_type,
+    //     current_salary,
+    //     expected_salary,
+    //     resume_path
+    //   )
+    //   VALUES (?,?,?,?,?,?,?,?,?)
+    //   `,
+    //   [
+    //     firstJobId,
+    //     selectedRoles,
+    //     name,
+    //     applicantEmail,
+    //     phone,
+    //     experience_type,
+    //     experience_type === "Experienced" ? current_salary : null,
+    //     expected_salary,
+    //     resumePath,
+    //   ],
+    // );
+
+    /* ---------------- Resume Limit Check ---------------- */
 
     const firstJobId = jobs[0].id;
+
+    // Count only active applications
+    const [applicationCount] = await connection.query(`
+  SELECT COUNT(*) AS total
+  FROM applications
+  WHERE status IN ('Pending', 'Shortlisted', 'Selected')
+`);
+
+    if (applicationCount[0].total >= 20) {
+      fs.unlinkSync(resumePath);
+
+      return res.status(400).json({
+        success: false,
+        message: "Application limit has been reached.",
+      });
+    }
+    const selectedRoles = jobs.map((x) => x.job_role).join(", ");
 
     /* ---------------- Save Application ---------------- */
 
     await connection.query(
       `
-      INSERT INTO applications
-      (
-        job_id,
-        selected_roles,
-        applicant_name,
-        applicant_email,
-        applicant_phone,
-        experience_type,
-        current_salary,
-        expected_salary,
-        resume_path
-      )
-      VALUES (?,?,?,?,?,?,?,?,?)
-      `,
+  INSERT INTO applications
+  (
+    job_id,
+    selected_roles,
+    applicant_name,
+    applicant_email,
+    applicant_phone,
+    experience_type,
+    current_salary,
+    expected_salary,
+    resume_path
+  )
+  VALUES (?,?,?,?,?,?,?,?,?)
+  `,
       [
         firstJobId,
         selectedRoles,
@@ -951,279 +1002,6 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
     connection.release();
   }
 });
-// app.post("/api/apply", upload.single("resume"), async (req, res) => {
-//   const connection = await db.promise().getConnection();
-
-//   try {
-//     const {
-//       job_ids,
-//       name,
-//       email,
-//       phone,
-//       experience_type,
-//       current_salary,
-//       expected_salary,
-//     } = req.body;
-
-//     const applicantEmail = email?.trim().toLowerCase();
-
-//     let selectedJobs = [];
-
-//     try {
-//       selectedJobs = JSON.parse(job_ids || "[]");
-//     } catch (err) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid job selection.",
-//       });
-//     }
-
-//     const resumePath = req.file?.path;
-
-//     const deleteResume = () => {
-//       try {
-//         if (resumePath && fs.existsSync(resumePath)) {
-//           fs.unlinkSync(resumePath);
-//         }
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     };
-
-//     /* ================= REQUIRED FIELDS ================= */
-
-//     if (
-//       !Array.isArray(selectedJobs) ||
-//       selectedJobs.length === 0 ||
-//       !name ||
-//       !applicantEmail ||
-//       !phone ||
-//       !experience_type ||
-//       !expected_salary
-//     ) {
-//       deleteResume();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Please fill all required fields.",
-//       });
-//     }
-//     /* ================= RESUME VALIDATION ================= */
-
-//     if (!req.file) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Resume is required.",
-//       });
-//     }
-
-//     if (req.file.mimetype !== "application/pdf") {
-//       deleteResume();
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Only PDF resumes are allowed.",
-//       });
-//     }
-
-//     /* ================= DUPLICATE EMAIL / PHONE CHECK ================= */
-//     // ADD THE BELOW CODE HERE
-
-//     const [duplicate] = await connection.query(
-//       `SELECT id
-//    FROM applications
-//    WHERE LOWER(applicant_email) = LOWER(?)
-//       OR applicant_phone = ?`,
-//       [applicantEmail, phone],
-//     );
-
-//     if (duplicate.length > 0) {
-//       deleteResume();
-
-//       return res.status(400).json({
-//         success: false,
-//         message:
-//           "An application with this email address or phone number already exists. You cannot apply again.",
-//       });
-//     }
-
-//     /* ================= FETCH JOBS ================= */
-
-//     const [jobs] = await connection.query(
-//       `SELECT * FROM career_jobs WHERE id IN (?)`,
-//       [selectedJobs],
-//     );
-
-//     const selectedRoles = jobs.map((job) => job.job_role).join(", ");
-
-//     if (jobs.length !== selectedJobs.length) {
-//       deleteResume();
-
-//       return res.status(404).json({
-//         success: false,
-//         message: "One or more selected jobs were not found.",
-//       });
-//     }
-
-//     /* ================= VALIDATE & INSERT ================= */
-
-//     /* ================= CHECK EACH SELECTED JOB ================= */
-
-//     for (const job of jobs) {
-//       // Already applied?
-//       const [alreadyApplied] = await connection.query(
-//         `SELECT status
-//      FROM applications
-//      WHERE job_id=? AND LOWER(applicant_email)=LOWER(?)`,
-//         [job.id, applicantEmail],
-//       );
-
-//       if (alreadyApplied.length > 0) {
-//         deleteResume();
-
-//         return res.status(400).json({
-//           success: false,
-//           message: `You have already applied for "${job.job_role}".`,
-//         });
-//       }
-
-//       // Maximum 20 applications
-//       const [count] = await connection.query(
-//         `SELECT COUNT(*) AS total
-//      FROM applications
-//      WHERE job_id=?`,
-//         [job.id],
-//       );
-
-//       if (count[0].total >= 20) {
-//         deleteResume();
-
-//         return res.status(400).json({
-//           success: false,
-//           message: `"${job.job_role}" already received 20 applications.`,
-//         });
-//       }
-//     }
-
-//     /* ================= SAVE SINGLE APPLICATION ================= */
-
-//     const firstJobId = jobs[0].id;
-//     await connection.query(
-//       `INSERT INTO applications
-// (
-// job_id,
-// selected_roles,
-// applicant_name,
-// applicant_email,
-// applicant_phone,
-// experience_type,
-// current_salary,
-// expected_salary,
-// resume_path,
-// status
-// )
-// VALUES (?,?,?,?,?,?,?,?,?,?)`,
-//       [
-//         firstJobId,
-//         selectedRoles,
-//         name,
-//         applicantEmail,
-//         phone,
-//         experience_type,
-//         experience_type === "Experienced" ? current_salary : null,
-//         expected_salary,
-//         null,
-//         "Pending",
-//       ],
-//     );
-
-//     // ================= SEND SINGLE EMAIL =================// ================= SEND SINGLE EMAIL =================
-
-//     const uniqueEmails = [
-//       ...new Set(
-//         jobs.map((job) => job.target_email?.trim()).filter((email) => email),
-//       ),
-//     ];
-//     console.log(uniqueEmails);
-
-//     console.log("========== MAIL DEBUG ==========");
-//     console.log("Target Emails:", uniqueEmails);
-//     console.log("Resume Path:", resumePath);
-//     console.log("Resume Exists:", fs.existsSync(resumePath));
-//     console.log("Selected Roles:", selectedRoles);
-//     console.log("===============================");
-
-//     let mailText =
-//       `Selected Job Roles : ${selectedRoles}\n\n` +
-//       `Applicant Name : ${name}\n` +
-//       `Email : ${applicantEmail}\n` +
-//       `Phone : ${phone}\n` +
-//       `Experience : ${experience_type}\n`;
-
-//     if (experience_type === "Experienced") {
-//       mailText += `Current Salary : ${current_salary}\n`;
-//     }
-
-//     mailText += `Expected Salary : ${expected_salary}`;
-
-//     try {
-//       console.log("Sending mail to:", uniqueEmails.join(","));
-//       console.log("Resume Path:", resumePath);
-//       console.log("Resume Exists:", fs.existsSync(resumePath));
-
-//       const info = await transporter.sendMail({
-//         from: process.env.EMAIL_USER,
-//         to: uniqueEmails.join(","),
-//         subject: `New Job Application - ${name}`,
-//         text: mailText,
-//         attachments: [
-//           {
-//             filename: req.file.originalname,
-//             path: resumePath,
-//           },
-//         ],
-//       });
-
-//       console.log("Mail Sent Successfully");
-//       console.log(info.response);
-
-//       deleteResume();
-
-//       return res.json({
-//         success: true,
-//         message: "Application submitted successfully.",
-//       });
-//     } catch (mailErr) {
-//       console.error("========== MAIL ERROR ==========");
-//       console.error(mailErr);
-//       console.error("Message:", mailErr.message);
-//       console.error("Stack:", mailErr.stack);
-//       console.error("===============================");
-
-//       deleteResume();
-
-//       return res.status(500).json({
-//         success: false,
-//         message: "Application saved, but email could not be sent.",
-//         error: mailErr.message,
-//         stack: mailErr.stack,
-//       });
-//     }
-//   } catch (err) {
-//     console.log("Apply Error:", err);
-
-//     if (req.file?.path && fs.existsSync(req.file.path)) {
-//       fs.unlinkSync(req.file.path);
-//     }
-
-//     return res.status(500).json({
-//       success: false,
-//       message: "Server error.",
-//     });
-//   } finally {
-//     connection.release();
-//   }
-// });
 
 /* ================= ROLES ================= */
 app.get("/api/roles", (req, res) => {
@@ -1231,8 +1009,10 @@ app.get("/api/roles", (req, res) => {
     `
     SELECT
       id,
-      job_role AS role
+      job_role AS role,
+      vacancies
     FROM career_jobs
+    WHERE vacancies > 0
     ORDER BY job_role ASC
     `,
     (err, result) => {
@@ -1255,19 +1035,20 @@ app.get("/api/roles", (req, res) => {
 app.get("/api/applications", (req, res) => {
   db.query(
     `SELECT
-      id,
-      applicant_name,
-      applicant_email,
-      applicant_phone,
-      selected_roles,
-      experience_type,
-      current_salary,
-      expected_salary,
-      resume_path,
-      status,
-      applied_at
-     FROM applications
-     ORDER BY applied_at DESC`,
+  id,
+  applicant_name,
+  applicant_email,
+  applicant_phone,
+  selected_roles,
+  experience_type,
+  current_salary,
+  expected_salary,
+  resume_path,
+  status,
+  applied_at
+FROM applications
+WHERE status != 'Rejected'
+ORDER BY applied_at DESC;`,
     (err, rows) => {
       if (err) {
         return res.status(500).json({
@@ -1289,8 +1070,7 @@ app.put("/api/applications/:id", (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  const allowed = ["Pending", "Shortlisted", "Rejected"];
-
+  const allowed = ["Pending", "Shortlisted", "Selected", "Rejected"];
   if (!allowed.includes(status)) {
     return res.status(400).json({
       success: false,
@@ -1530,9 +1310,7 @@ function sendNotification(data) {
 global.sendNotification = sendNotification;
 
 /* ================= START ================= */
-
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-
-  console.log(`WebSocket running on ws://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://192.168.88.2:${PORT}`);
+  console.log(`WebSocket running on ws://192.168.88.2:${PORT}`);
 });
