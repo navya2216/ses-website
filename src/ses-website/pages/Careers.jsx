@@ -7,8 +7,7 @@ import ApplyForm from "./careers/ApplyForm";
 
 import "../asset/css/careers1.css";
 
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
+const API = window.location.origin;
 
 function Careers() {
   const [jobs, setJobs] = useState([]);

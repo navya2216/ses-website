@@ -5,7 +5,7 @@ import nvidia from "../asset/images/partners/nvidia.png";
 import sbl from "../asset/images/partners/sbl.png";
 import advantech from "../asset/images/partners/advantech.png";
 import xilinx from "../asset/images/partners/xilinx.png";
-import scientific from "../asset/images/partners/scientific.png";
+import scientific from "../asset/images/partners/Scientific-logo.png";
 import siglent from "../asset/images/partners/siglent.png";
 
 import drdl from "../asset/images/partners/drdl.png";
@@ -28,7 +28,6 @@ const partnerCategories = [
     subtitle: "Collaborating with leading tech innovators",
     partners: [
       { name: "NVIDIA", image: nvidia },
-      { name: "SBL", image: sbl },
       { name: "ADVANTECH", image: advantech },
       { name: "XILINX", image: xilinx },
       { name: "SCIENTIFIC", image: scientific },
@@ -52,6 +51,7 @@ const partnerCategories = [
       { name: "VAISHNAVI", image: vaishnavi },
       { name: "SRIDATTA", image: sridatta },
       { name: "SILICON ENGINEERS", image: siliconEngineers },
+      { name: "SBL TECHNOLOGIES", image: sbl },
     ],
   },
   {
@@ -62,6 +62,7 @@ const partnerCategories = [
       { name: "SRIDATTA DMV", image: sridattaDmv },
       { name: "UNITECH", image: unitech },
       { name: "RAINBOW WORKS", image: rainbowWorks },
+      { name: "AKSHAYA ENGINEERING WORKS" },
     ],
   },
 ];
@@ -89,12 +90,20 @@ function PartnersSection() {
 
               <div className="partner-row">
                 {category.partners.map((partner, i) => (
-                  <div className="partner-card" key={i}>
-                    <img src={partner.image} alt={partner.name} />
-
-                    <div className="partner-overlay">
+                  <div
+                    className={`partner-card${partner.image ? "" : " partner-card--text"}`}
+                    key={partner.name}
+                  >
+                    {partner.image ? (
+                      <>
+                        <img src={partner.image} alt={partner.name} />
+                        <div className="partner-overlay">
+                          <h4>{partner.name}</h4>
+                        </div>
+                      </>
+                    ) : (
                       <h4>{partner.name}</h4>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>

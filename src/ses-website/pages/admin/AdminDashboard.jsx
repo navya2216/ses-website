@@ -23,7 +23,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (!email) {
-      navigate("/login");
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -44,8 +44,9 @@ function AdminDashboard() {
 
     localStorage.removeItem("adminEmail");
     localStorage.removeItem("adminName");
+    localStorage.removeItem("userRole");
 
-    navigate("/admin/login", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   const downloadTemplate = () => {

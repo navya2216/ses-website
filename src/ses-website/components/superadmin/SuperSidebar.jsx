@@ -17,8 +17,10 @@ function SuperSidebar() {
   const navigate = useNavigate();
 
   const logout = () => {
+    localStorage.removeItem("superAdminName");
     localStorage.removeItem("superAdminEmail");
-    navigate("/superadmin/login");
+    localStorage.removeItem("userRole");
+    navigate("/login", { replace: true });
   };
 
   return (

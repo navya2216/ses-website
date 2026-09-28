@@ -25,7 +25,7 @@ function SuperAdminDashboard() {
 
   useEffect(() => {
     if (!email) {
-      navigate("/login");
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -42,8 +42,10 @@ function SuperAdminDashboard() {
     if (!window.confirm("Are you sure you want to Logout?")) return;
 
     localStorage.removeItem("superAdminEmail");
+    localStorage.removeItem("superAdminName");
+    localStorage.removeItem("userRole");
 
-    navigate("/superadmin/login");
+    navigate("/login", { replace: true });
   };
 
   return (

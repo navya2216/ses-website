@@ -1,24 +1,55 @@
+/* =========================================================
+   APPLICATIONS PAGE
+========================================================= */
+
 .applications-page {
   padding: 30px;
-  background: #f4f7fb;
+  background: #f5f7f6;
   min-height: 100vh;
+  box-sizing: border-box;
 }
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 20px;
+}
+
+.page-title-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
 }
 
 .page-header h2 {
   font-size: 28px;
-  color: #1e293b;
+  color: #26332d;
   margin: 0;
+  font-weight: 700;
 }
 
+.application-count {
+  background: #e8f2ed;
+  color: #26734d;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
 .back-btn {
-  background: #2563eb;
+  background: #334e42;
   color: #fff;
   border: none;
   padding: 10px 22px;
@@ -28,91 +59,666 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: 0.3s;
+  transition: 0.25s ease;
 }
 
 .back-btn:hover {
-  background: #1d4ed8;
+  background: #263b32;
+  transform: translateY(-1px);
 }
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
 
 .table-card {
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(31, 41, 55, 0.07);
   overflow: hidden;
+  border: 1px solid #e7ece9;
 }
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
 
 .table-card table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1250px;
 }
 
 .table-card thead {
-  background: #2563eb;
+  background: #334e42;
   color: white;
 }
 
 .table-card th {
-  padding: 16px;
+  padding: 15px;
   text-align: left;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .table-card td {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
+  padding: 14px 15px;
+  border-bottom: 1px solid #edf0ee;
   font-size: 14px;
+  color: #3f4a44;
+  vertical-align: middle;
+}
+
+.table-card tbody tr {
+  transition: background 0.2s ease;
 }
 
 .table-card tbody tr:hover {
-  background: #f8f9fc;
+  background: #f7faf8;
 }
 
-.table-card select {
+/* =========================================================
+   TEXT
+========================================================= */
+
+.candidate-name {
+  font-weight: 650;
+  color: #26332d;
+  white-space: nowrap;
+}
+
+.email-text {
+  color: #52605a;
+}
+
+.role-text {
+  max-width: 190px;
+  line-height: 1.5;
+}
+
+.experience-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 15px;
+  background: #eef3f0;
+  color: #486157;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.table-card select,
+.status-select {
   width: 150px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-
-.delete-btn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid #d7ded9;
+  background: #fff;
+  color: #3d4943;
   cursor: pointer;
-  transition: 0.3s;
+  outline: none;
 }
 
-.delete-btn:hover {
-  background: #dc2626;
+.status-select:focus {
+  border-color: #719785;
+  box-shadow: 0 0 0 3px rgba(113, 151, 133, 0.12);
 }
 
 .pending {
-  color: #d97706;
+  color: #a16207;
   font-weight: 600;
 }
 
 .shortlisted {
-  color: #16a34a;
+  color: #27734b;
   font-weight: 600;
 }
 
 .rejected {
-  color: #dc2626;
+  color: #b53b3b;
   font-weight: 600;
 }
 
-@media (max-width: 992px) {
-  .table-card {
-    overflow-x: auto;
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.preview-btn {
+  background: #557565;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: 0.25s ease;
+}
+
+.preview-btn:hover {
+  background: #3f5d4e;
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: #b94a48;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: 0.25s ease;
+}
+
+.delete-btn:hover {
+  background: #983b39;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading-box {
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #52605a;
+  font-size: 15px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #dce5df;
+  border-top-color: #557565;
+  border-radius: 50%;
+  animation: applicationSpin 0.8s linear infinite;
+}
+
+@keyframes applicationSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-top: 1px solid #edf0ee;
+  background: #fbfcfb;
+  gap: 15px;
+}
+
+.pagination-info {
+  color: #66736d;
+  font-size: 13px;
+}
+
+.pagination-info strong {
+  color: #334e42;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-btn {
+  border: 1px solid #d4ddd8;
+  background: #fff;
+  color: #405148;
+  padding: 8px 13px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-size: 13px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #edf4f0;
+  border-color: #a9bbb0;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-number {
+  min-width: 62px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #334e42;
+  color: #fff;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   MOBILE CARDS
+========================================================= */
+
+.mobile-applications {
+  display: none;
+}
+
+.application-mobile-card {
+  background: #fff;
+  border: 1px solid #e4eae6;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.mobile-card-header {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #edf0ee;
+}
+
+.mobile-card-header h3 {
+  margin: 0 0 5px;
+  font-size: 17px;
+  color: #26332d;
+}
+
+.mobile-card-header > div > span {
+  font-size: 12px;
+  color: #708078;
+}
+
+.mobile-status {
+  height: fit-content;
+  padding: 5px 9px;
+  border-radius: 15px;
+  font-size: 11px;
+  background: #eef3f0;
+}
+
+.mobile-card-body {
+  padding: 15px;
+}
+
+.mobile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f2f1;
+}
+
+.mobile-info strong {
+  font-size: 12px;
+  color: #7a8680;
+}
+
+.mobile-info span {
+  font-size: 14px;
+  color: #34423a;
+  word-break: break-word;
+}
+
+.mobile-status-control {
+  padding-top: 12px;
+}
+
+.mobile-status-control .status-select {
+  width: 100%;
+}
+
+.mobile-card-actions {
+  padding: 13px 15px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #edf0ee;
+}
+
+.mobile-card-actions button {
+  flex: 1;
+}
+
+/* =========================================================
+   PREVIEW OVERLAY
+========================================================= */
+
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 29, 25, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+/* =========================================================
+   PREVIEW MODAL
+========================================================= */
+
+.preview-modal {
+  width: min(900px, 100%);
+  max-height: 92vh;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: #f5f8f6;
+  border-bottom: 1px solid #e3e9e5;
+}
+
+.preview-header h2 {
+  margin: 0;
+  color: #29372f;
+  font-size: 21px;
+}
+
+.preview-header span {
+  display: block;
+  margin-top: 4px;
+  color: #75827b;
+  font-size: 13px;
+}
+
+.preview-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #e8edea;
+  color: #526159;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-close-btn:hover {
+  background: #dce4df;
+}
+
+/* =========================================================
+   PREVIEW BODY
+========================================================= */
+
+.preview-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.preview-profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e8ece9;
+  margin-bottom: 22px;
+}
+
+.candidate-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #557565;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.preview-profile h3 {
+  margin: 0;
+  color: #28362f;
+  font-size: 20px;
+}
+
+.preview-profile p {
+  margin: 5px 0 0;
+  color: #6d7973;
+  font-size: 13px;
+}
+
+.preview-section {
+  margin-bottom: 24px;
+}
+
+.preview-section h4 {
+  margin: 0 0 15px;
+  color: #34443b;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   PREVIEW GRID
+========================================================= */
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.preview-field {
+  background: #f8faf9;
+  border: 1px solid #e8ecea;
+  border-radius: 9px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.preview-field label {
+  display: block;
+  color: #7b8781;
+  font-size: 11px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.preview-field span {
+  color: #35433c;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.preview-status {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 15px;
+  background: #eef3f0;
+}
+
+/* =========================================================
+   PREVIEW STATUS SELECT
+========================================================= */
+
+.preview-status-select {
+  width: 220px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d3ddd7;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #405047;
+}
+
+.preview-status-select:focus {
+  border-color: #718f7f;
+}
+
+/* =========================================================
+   RESUME
+========================================================= */
+
+.resume-preview-box {
+  border: 1px solid #e2e9e5;
+  background: #f8faf9;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.resume-preview-box > svg {
+  font-size: 25px;
+  color: #557565;
+  flex-shrink: 0;
+}
+
+.resume-preview-box > div:not(.resume-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.resume-preview-box strong {
+  color: #34443b;
+  font-size: 14px;
+}
+
+.resume-preview-box span {
+  color: #7a8680;
+  font-size: 12px;
+}
+
+.resume-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.resume-preview-btn,
+.resume-download-btn {
+  text-decoration: none;
+  padding: 8px 11px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.resume-preview-btn {
+  background: #557565;
+  color: #fff;
+}
+
+.resume-download-btn {
+  background: #e4ebe7;
+  color: #405148;
+}
+
+.resume-preview-btn:hover {
+  background: #3f5d4e;
+}
+
+.resume-download-btn:hover {
+  background: #d6e0da;
+}
+
+/* =========================================================
+   PREVIEW FOOTER
+========================================================= */
+
+.preview-footer {
+  padding: 15px 24px;
+  border-top: 1px solid #e5eae7;
+  display: flex;
+  justify-content: flex-end;
+  background: #fafbfa;
+}
+
+.preview-footer-close {
+  background: #334e42;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 20px;
+  cursor: pointer;
+}
+
+.preview-footer-close:hover {
+  background: #263b32;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+  .applications-page {
+    padding: 22px;
+  }
+
+  .page-header h2 {
+    font-size: 24px;
   }
 
   .table-card table {
-    min-width: 1000px;
+    min-width: 1150px;
   }
 }
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media (max-width: 768px) {
   .applications-page {
@@ -121,16 +727,142 @@
 
   .page-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: stretch;
+    gap: 13px;
+  }
+
+  .page-title-section {
+    margin-left: 0;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .page-header h2 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .application-count {
+    font-size: 11px;
   }
 
   .back-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .table-responsive {
+    display: none;
+  }
+
+  .mobile-applications {
+    display: block;
+    padding: 12px;
+  }
+
+  .pagination-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagination-info {
+    text-align: center;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+
+  .pagination-btn {
+    justify-content: center;
+  }
+
+  .preview-overlay {
+    padding: 10px;
+  }
+
+  .preview-modal {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .preview-header {
+    padding: 16px;
+  }
+
+  .preview-header h2 {
+    font-size: 18px;
+  }
+
+  .preview-body {
+    padding: 16px;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-preview-box {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .resume-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .resume-preview-btn,
+  .resume-download-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .preview-footer {
+    padding: 12px 16px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+  .applications-page {
+    padding: 10px;
+  }
+
+  .page-header h2 {
+    font-size: 19px;
+  }
+
+  .page-title-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mobile-card-actions {
+    flex-direction: column;
+  }
+
+  .pagination-controls {
+    gap: 6px;
+  }
+
+  .pagination-btn {
+    padding: 8px 9px;
+  }
+
+  .page-number {
+    min-width: 52px;
+  }
+
+  .preview-profile {
+    align-items: flex-start;
+  }
+
+  .candidate-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
   }
 }

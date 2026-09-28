@@ -14,7 +14,7 @@ function UploadJobs() {
     const superAdmin = localStorage.getItem("superAdminEmail");
 
     if (!admin && !superAdmin) {
-      navigate("/admin/login");
+      navigate("/login", { replace: true });
     }
   }, [navigate]);
 

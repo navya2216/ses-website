@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaUserShield, FaEnvelope, FaLock } from "react-icons/fa";
+import {
+  FaUserShield,
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
 import "../asset/css/login.css";
 
-const API =
-  process.env.REACT_APP_API_URL || `http://${window.location.hostname}:4006`;
+const API = window.location.origin;
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
 
   const [showOtp, setShowOtp] = useState(false);
@@ -146,11 +152,26 @@ function Login() {
             <FaLock />
 
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
+
+            <button
+              type="button"
+              className="password-toggle"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              {showPassword ? (
+                <FaEyeSlash aria-hidden="true" />
+              ) : (
+                <FaEye aria-hidden="true" />
+              )}
+            </button>
           </div>
         </div>
 

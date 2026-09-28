@@ -3,6 +3,7 @@ require("dotenv").config();
 /* ================= IMPORTS ================= */
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const multer = require("multer");
 const xlsx = require("xlsx");
 const nodemailer = require("nodemailer");
@@ -43,7 +44,7 @@ db.getConnection((err, connection) => {
 });
 
 /* ================= CONFIG ================= */
-const PORT = process.env.PORT || 4006;
+const PORT = 4006;
 
 /* ================= MEMORY ================= */
 const otpStore = new Map();
@@ -1272,6 +1273,18 @@ app.post("/api/contact", async (req, res) => {
     });
   }
 });
+const buildDirectory = path.join(__dirname, "build");
+app.use(express.static(buildDirectory));
+app.get(/.*/, (req, res, next) => {
+  if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/")) {
+    return next();
+  }
+
+  res.sendFile(path.join(buildDirectory, "index.html"), (error) => {
+    if (error) next(error);
+  });
+});
+
 /* ================= WEBSOCKET ================= */
 
 const server = http.createServer(app);
@@ -1311,6 +1324,6 @@ global.sendNotification = sendNotification;
 
 /* ================= START ================= */
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://192.168.88.2:${PORT}`);
-  console.log(`WebSocket running on ws://192.168.88.2:${PORT}`);
+  console.log(`Website and API running on http://localhost:${PORT}`);
+  console.log(`WebSocket running on ws://localhost:${PORT}`);
 });

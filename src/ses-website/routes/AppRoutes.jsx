@@ -48,8 +48,9 @@ function AppRoutes() {
 
       {/* ================= Super Admin ================= */}
 
-      {/* <Route path="/superadmin/login" element={<SuperAdminLogin />} /> */}
       <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<Login />} />
+      <Route path="/superadmin/login" element={<Login />} />
 
       <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
@@ -65,9 +66,6 @@ function AppRoutes() {
       <Route path="/superadmin/applications" element={<Applications />} />
 
       {/* ================= Admin ================= */}
-
-      {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
-      <Route path="/login" element={<Login />} />
 
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
 

@@ -46,4 +46,4 @@ src/
 
 ## Run and verify
 
-From the repository root, use `npm start` to build the frontend and serve it with the Express API on one port. Open `http://localhost:4006` on this computer or `http://192.168.88.2:4006` on the local network. Use `npm run build` to build the frontend without starting the server.
+The React build and Express API are served together on port `4006`. From the repository root, run `npm start` and open `http://localhost:4006`. See the root [README run guide](../../README.md) for MySQL and email prerequisites, Admin and Super Admin login validation, and troubleshooting. Use `npm run build` to validate the frontend separately.

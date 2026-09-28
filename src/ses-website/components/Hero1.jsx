@@ -8,18 +8,18 @@ function Hero1() {
       <div className="container hero1-container">
         <div className="hero1-content">
           <span className="hero1-badge">
-            🚀 Trusted Software Development Company
+            Engineering Software · Electronics · Test Systems
           </span>
 
           <h1>
-            Transforming Businesses Through
-            <span> Innovative Software Solutions</span>
+            Engineering solutions for
+            <span> complex technical needs</span>
           </h1>
 
           <p>
-            We build modern web applications, enterprise software, cloud
-            solutions, and digital products that help businesses scale faster
-            and operate smarter.
+            Soft Electronic Solutions delivers tailored ATE and DAQ, embedded,
+            electronics, and software engineering services for aerospace,
+            automotive, defense, and industrial applications.
           </p>
 
           <div className="hero1-buttons">
@@ -31,36 +31,19 @@ function Hero1() {
               Get Quote
             </Link>
           </div>
-
-          <div className="hero1-stats">
-            <div className="stat-box">
-              <h3>100+</h3>
-              <p>Projects</p>
-            </div>
-
-            <div className="stat-box">
-              <h3>50+</h3>
-              <p>Clients</p>
-            </div>
-
-            <div className="stat-box">
-              <h3>10+</h3>
-              <p>Years</p>
-            </div>
-          </div>
         </div>
 
         <div className="hero1-image">
           <img
             src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200"
-            alt="Software Development"
+            alt="Engineering team collaborating on a technical project"
           />
 
-          <div className="floating-card card1">💻 Web Development</div>
+          <div className="floating-card card1">ATE &amp; DAQ</div>
 
-          <div className="floating-card card2">📱 Mobile Apps</div>
+          <div className="floating-card card2">Embedded Systems</div>
 
-          <div className="floating-card card3">☁ Cloud Solutions</div>
+          <div className="floating-card card3">Electronics Engineering</div>
         </div>
       </div>
     </section>

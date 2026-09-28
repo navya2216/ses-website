@@ -1,5 +1,14 @@
 import React from "react";
-import { FaLightbulb, FaAward, FaHandshake, FaBullseye } from "react-icons/fa";
+import {
+  FaLightbulb,
+  FaAward,
+  FaHandshake,
+  FaBullseye,
+  FaCode,
+  FaMicrochip,
+  FaSlidersH,
+  FaUsers,
+} from "react-icons/fa";
 
 import "../asset/css/about.css";
 
@@ -37,6 +46,69 @@ function About() {
             and strategists work together to create solutions that not only meet
             technical requirements but also deliver real business value.
           </p>
+
+          <p>
+            Our commitment to reliability, quality, and continuous effort
+            distinguishes us in the industry. We deliver comprehensive ATE and
+            Data Acquisition (DAQ) solutions, carefully tailored to meet the
+            unique requirements of our clients. From defense organizations and
+            public sector undertakings (PSUs) to automotive manufacturers, we
+            provide customized services that deliver exceptional value.
+          </p>
+        </div>
+      </section>
+
+      {/* Our People */}
+      <section className="about-team section">
+        <div className="container">
+          <div className="section-title">
+            <span>Our People</span>
+            <h2>The People Behind Our Solutions</h2>
+          </div>
+
+          <p className="about-team-intro">
+            Our multidisciplinary team brings together technical knowledge,
+            practical experience, and a commitment to solving each client’s
+            engineering challenges.
+          </p>
+
+          <div className="team-grid">
+            <article className="team-card">
+              <FaCode aria-hidden="true" />
+              <h3>Software Engineers</h3>
+              <p>
+                Develop dependable software and applications that support
+                complex engineering and business needs.
+              </p>
+            </article>
+
+            <article className="team-card">
+              <FaMicrochip aria-hidden="true" />
+              <h3>Embedded Systems Engineers</h3>
+              <p>
+                Work across embedded applications and electronics to deliver
+                solutions built around real-world requirements.
+              </p>
+            </article>
+
+            <article className="team-card">
+              <FaSlidersH aria-hidden="true" />
+              <h3>ATE &amp; DAQ Specialists</h3>
+              <p>
+                Shape automated test and data acquisition systems to meet each
+                client’s technical and operational needs.
+              </p>
+            </article>
+
+            <article className="team-card">
+              <FaUsers aria-hidden="true" />
+              <h3>Designers &amp; Strategists</h3>
+              <p>
+                Bring teams and stakeholders together to turn project goals into
+                thoughtful, practical solutions.
+              </p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -108,16 +180,18 @@ function About() {
         <div className="container">
           <div className="section-title">
             <span>Why SES</span>
-            <h2>Why Choose Us?</h2>
+            <h2>Key Strengths</h2>
           </div>
 
           <div className="why-grid">
-            <div>✔ Experienced Software Team</div>
-            <div>✔ Embedded Systems Expertise</div>
-            <div>✔ Automotive Domain Knowledge</div>
-            <div>✔ Client-Focused Solutions</div>
-            <div>✔ Innovative R&D Culture</div>
-            <div>✔ Reliable Project Delivery</div>
+            <div>
+              ✔ Extensive domain expertise in Aerospace, Automotive, and
+              Embedded Applications
+            </div>
+            <div>✔ Strong emphasis on innovation and R&amp;D</div>
+            <div>✔ Tailored solutions designed around client needs</div>
+            <div>✔ Proven reliability and uncompromising quality</div>
+            <div>✔ Dedicated focus on the defense sector</div>
           </div>
         </div>
       </section>
