@@ -157,12 +157,35 @@ function ApplyForm() {
         setApiError(res.data.message);
       }
     } catch (err) {
-      console.log(err);
+      const status = err.response?.status;
+      const serverMessage = err.response?.data?.message;
 
-      setApiError(err.response?.data?.message || "Application failed.");
+      if (status === 409) {
+        setApiError(
+          "We couldn't accept this application because an application already exists with this email address or phone number. Contact our hiring team if you need to update your existing application.",
+        );
+      } else if (status === 404) {
+        setApiError(
+          serverMessage ||
+            "One of the selected roles is no longer available. Please refresh the page and select an open role.",
+        );
+      } else if (status === 400) {
+        setApiError(
+          serverMessage ||
+            "Please check the application details and PDF resume, then try again.",
+        );
+      } else if (status >= 500) {
+        setApiError(
+          "We couldn't submit your application right now. Your details are still here; please try again later or contact our hiring team.",
+        );
+      } else {
+        setApiError(
+          "We couldn't reach the application service. Check your connection and try again.",
+        );
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

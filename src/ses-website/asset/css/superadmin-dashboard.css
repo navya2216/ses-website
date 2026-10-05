@@ -16,7 +16,8 @@ body {
 /* ================= HEADER ================= */
 
 .superadmin-header {
-  background: #fff;
+  background: #08467f;
+  color: #fff;
 
   border-radius: 12px;
 
@@ -32,13 +33,13 @@ body {
 }
 
 .superadmin-header h2 {
-  color: #0d6efd;
+  color: #fff;
 
   margin-bottom: 5px;
 }
 
 .superadmin-header p {
-  color: #666;
+  color: #d7e8f3;
 }
 
 .header-right {
@@ -92,7 +93,7 @@ body {
 .nav-btn {
   text-decoration: none;
 
-  background: #0d6efd;
+  background: #08467f;
 
   color: #fff;
 
@@ -112,7 +113,7 @@ body {
 }
 
 .nav-btn:hover {
-  background: #084298;
+  background: #06385f;
 
   color: #fff;
 }
@@ -132,7 +133,7 @@ body {
 }
 
 .welcome-card h2 {
-  color: #0d6efd;
+  color: #08467f;
 
   margin-bottom: 10px;
 }
@@ -168,7 +169,7 @@ body {
 .stat-icon {
   font-size: 45px;
 
-  color: #0d6efd;
+  color: #08467f;
 
   margin-bottom: 15px;
 }

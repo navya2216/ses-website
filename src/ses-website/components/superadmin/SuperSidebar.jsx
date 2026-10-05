@@ -20,7 +20,7 @@ function SuperSidebar() {
     localStorage.removeItem("superAdminName");
     localStorage.removeItem("superAdminEmail");
     localStorage.removeItem("userRole");
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

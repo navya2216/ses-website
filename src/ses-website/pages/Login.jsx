@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {
-  FaUserShield,
-  FaEnvelope,
-  FaLock,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 import "../asset/css/login.css";
+import sesLogo from "../asset/ses_logo.png";
 
 const API = window.location.origin;
 
@@ -70,7 +65,7 @@ function Login() {
         localStorage.setItem("adminEmail", res.data.admin.email);
         localStorage.setItem("adminName", res.data.admin.name);
 
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login Failed");
@@ -106,7 +101,7 @@ function Login() {
         localStorage.setItem("superAdminEmail", res.data.superAdmin.email);
         localStorage.setItem("superAdminName", res.data.superAdmin.name);
 
-        navigate("/superadmin/dashboard");
+        navigate("/superadmin/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "OTP Verification Failed");
@@ -118,9 +113,11 @@ function Login() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <div className="login-icon">
-          <FaUserShield />
-        </div>
+        <img
+          className="admin-login-logo"
+          src={sesLogo}
+          alt="Soft Electronic Solutions"
+        />
 
         <h2>Career Portal Login</h2>
 

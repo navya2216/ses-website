@@ -68,7 +68,7 @@ CREATE TABLE applications (
 
     expected_salary DECIMAL(10,2) NOT NULL,
 
-    resume_path VARCHAR(500) NOT NULL,
+    resume_path VARCHAR(500) NULL,
 
     status ENUM('Pending','Shortlisted','Rejected')
         DEFAULT 'Pending',

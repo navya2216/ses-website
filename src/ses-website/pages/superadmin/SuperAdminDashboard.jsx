@@ -9,6 +9,10 @@ import {
   FaUpload,
   FaClipboardList,
   FaSignOutAlt,
+  FaClock,
+  FaUserCheck,
+  FaCheckCircle,
+  FaTimesCircle,
 } from "react-icons/fa";
 import api from "../../api";
 import "../../asset/css/superadmin-dashboard.css";
@@ -21,6 +25,10 @@ function SuperAdminDashboard() {
     totalAdmins: 0,
     totalJobs: 0,
     totalApplications: 0,
+    pendingApplications: 0,
+    shortlistedApplications: 0,
+    selectedApplications: 0,
+    rejectedApplications: 0,
   });
 
   useEffect(() => {
@@ -45,7 +53,7 @@ function SuperAdminDashboard() {
     localStorage.removeItem("superAdminName");
     localStorage.removeItem("userRole");
 
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (
@@ -138,6 +146,30 @@ function SuperAdminDashboard() {
           <h2>{stats.totalApplications}</h2>
 
           <p>Total Applications</p>
+        </div>
+
+        <div className="stat-card">
+          <FaClock className="stat-icon" />
+          <h2>{stats.pendingApplications}</h2>
+          <p>Pending</p>
+        </div>
+
+        <div className="stat-card">
+          <FaUserCheck className="stat-icon" />
+          <h2>{stats.shortlistedApplications}</h2>
+          <p>Shortlisted</p>
+        </div>
+
+        <div className="stat-card">
+          <FaCheckCircle className="stat-icon" />
+          <h2>{stats.selectedApplications}</h2>
+          <p>Selected</p>
+        </div>
+
+        <div className="stat-card">
+          <FaTimesCircle className="stat-icon" />
+          <h2>{stats.rejectedApplications}</h2>
+          <p>Rejected</p>
         </div>
       </div>
     </div>
