@@ -1,0 +1,196 @@
+.company-calendar-section {
+  min-height: 55vh;
+  background: #f8faff;
+  padding: 3rem 0;
+}
+
+.company-calendar-header {
+  margin-bottom: 2rem;
+}
+
+.company-calendar-header h1 {
+  margin-bottom: 0.75rem;
+}
+
+.company-calendar-header p {
+  margin-bottom: 0.5rem;
+}
+
+.company-calendar-error {
+  padding: 1rem;
+  color: #842029;
+  background: #f8d7da;
+  border-radius: 8px;
+}
+
+.company-month-calendar,
+.company-calendar-list-section {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.company-calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.company-calendar-controls h2 {
+  margin: 0;
+  color: #08467f;
+}
+
+.company-calendar-controls button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: #e8f1f7;
+  color: #08467f;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.company-calendar-controls button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.company-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.company-calendar-weekday {
+  padding: 0.5rem;
+  color: #475467;
+  font-weight: 700;
+  text-align: center;
+}
+
+.company-calendar-day {
+  display: flex;
+  min-height: 90px;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.company-calendar-day.is-empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.company-calendar-day-number {
+  color: #344054;
+  font-weight: 600;
+}
+
+.company-calendar-day.is-holiday {
+  border-color: #e5a000;
+  background: #fff1c2;
+}
+
+.company-calendar-day.is-holiday .company-calendar-day-number {
+  color: #7a4300;
+}
+
+.company-calendar-holiday-name {
+  color: #7a4300;
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.company-calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  color: #475467;
+}
+
+.company-calendar-legend span {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #e5a000;
+  border-radius: 4px;
+  background: #fff1c2;
+}
+
+.company-calendar-pdf {
+  margin: 1rem 0;
+}
+
+.company-calendar-list-section {
+  margin-top: 1.5rem;
+}
+
+.company-calendar-list-section h2 {
+  margin-bottom: 1rem;
+  color: #08467f;
+}
+
+.company-calendar-empty,
+.company-holiday-list {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.company-holiday-list {
+  list-style: none;
+  padding-left: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.company-holiday-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.company-holiday-list li:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .company-month-calendar,
+  .company-calendar-list-section {
+    padding: 0.75rem;
+  }
+
+  .company-calendar-grid {
+    gap: 0.2rem;
+  }
+
+  .company-calendar-weekday {
+    padding: 0.3rem 0;
+    font-size: 0.78rem;
+  }
+
+  .company-calendar-day {
+    min-height: 64px;
+    gap: 0.25rem;
+    padding: 0.35rem 0.25rem;
+  }
+
+  .company-calendar-holiday-name {
+    font-size: 0.65rem;
+    line-height: 1.15;
+  }
+
+  .company-holiday-list {
+    padding: 0.75rem;
+  }
+}
